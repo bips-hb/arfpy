@@ -1,6 +1,0 @@
-Metadata-Version: 2.1
-Name: arfpy
-Version: 0.0.1
-Summary: Adversarial random forests for density estimation and generative modeling
-Author: blesch kapar wright
-License-File: LICENSE.txt
