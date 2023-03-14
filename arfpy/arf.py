@@ -4,14 +4,15 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble._forest import _generate_unsampled_indices
 
-class genrf:
-  """Generative RF"""
+class arf:
+  """Adversarial RF"""
   def __init__(self, x, oob = False, dist = "normal", **kwargs):
     x_real = x.copy()
     self.p = x_real.shape[1]
     self.orig_colnames = list(x_real)
     self.dist = dist
-    
+    self.oob = oob
+
     # Find object columns and convert to category
     self.object_cols = x_real.dtypes == "object"
     for col in list(x_real):
@@ -42,16 +43,20 @@ class genrf:
     # Fit RF to both data
     clf = RandomForestClassifier(**kwargs) 
     clf.fit(x, y)
-    
+    self.clf = clf
+
+    self.x_real = x_real
+
+  def forde(self):
     # Get terminal nodes for all observations
-    pred = clf.apply(x_real)
+    pred = self.clf.apply(self.x_real)
     
-    self.num_trees = clf.n_estimators
+    self.num_trees = self.clf.n_estimators
     
     # If OOB, use only OOB trees
-    if oob:
+    if self.oob:
       for tree in range(self.num_trees):
-        idx_oob = np.isin(range(x_real.shape[0]), _generate_unsampled_indices(clf.estimators_[tree].random_state, x.shape[0], x.shape[0]))
+        idx_oob = np.isin(range(self.x_real.shape[0]), _generate_unsampled_indices(self.clf.estimators_[tree].random_state, x.shape[0], x.shape[0]))
         pred[np.invert(idx_oob), tree] = -1
     
     # Get probabilities of terminal nodes for each tree 
@@ -67,7 +72,7 @@ class genrf:
     self.params = pd.DataFrame()
     if np.invert(self.factor_cols).any():
       for tree in range(self.num_trees):
-        dt = x_real.loc[:, np.invert(self.factor_cols)].copy()
+        dt = self.x_real.loc[:, np.invert(self.factor_cols)].copy()
         dt["tree"] = tree
         dt["nodeid"] = pred[:,tree]
         long = pd.melt(dt[dt["nodeid"] >= 0], id_vars = ["tree", "nodeid"])
@@ -82,14 +87,17 @@ class genrf:
     self.class_probs = pd.DataFrame()
     if self.factor_cols.any():
       for tree in range(self.num_trees):
-        dt = x_real.loc[:, self.factor_cols].copy()
+        dt = self.x_real.loc[:, self.factor_cols].copy()
         dt["tree"] = tree
         dt["nodeid"] = pred[:,tree]
         long = pd.melt(dt[dt["nodeid"] >= 0], id_vars = ["tree", "nodeid"])
         res = long.value_counts(sort = False).rename('freq').reset_index()
         self.class_probs = pd.concat([self.class_probs, res])
+    return {"cnt": self.params, "cat": self.class_probs, 
+            "forest": self.clf, "meta" : pd.DataFrame(data={"variable": self.orig_colnames, "family": self.dist})}
+  # TO DO: define parameters we want to return from density estimation
   
-  def sample(self, n):
+  def forge(self, n):
     # Sample new observations and get their terminal nodes
     # nodeids dims: [new obs, tree]
     def myfun(x):
