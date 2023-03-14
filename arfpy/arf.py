@@ -6,7 +6,7 @@ from sklearn.ensemble._forest import _generate_unsampled_indices
 
 class arf:
   """Adversarial RF"""
-  def __init__(self, x, oob = False, dist = "normal", **kwargs):
+  def __init__(self, x, oob = False, dist = "normal", delta = 0,  max_iters =10, **kwargs):
     x_real = x.copy()
     self.p = x_real.shape[1]
     self.orig_colnames = list(x_real)
@@ -40,12 +40,45 @@ class arf:
     x = pd.concat([x_real, x_synth])
     y = np.concatenate([np.zeros(x_real.shape[0]), np.ones(x_real.shape[0])])
     
-    # Fit RF to both data
-    clf = RandomForestClassifier(**kwargs) 
-    clf.fit(x, y)
-    self.clf = clf
-
+    # pass on x_real
     self.x_real = x_real
+
+    # Fit initial RF model
+    clf_0 = RandomForestClassifier( oob_score= 'True', **kwargs) 
+    clf_0.fit(x, y)
+
+    iters = 0
+    acc_0 = 1 - clf_0.oob_score_
+    print(f'accuracy is {acc_0}')
+    if (acc_0 > 0.5 + delta and iters < max_iters):
+      converged = False
+      while (not converged): # Start adversarial loop
+        # get nodeIDs
+        nodeIDs = clf_0.apply(self.x_real)
+        # get number of trees 
+        num_trees = clf_0.n_estimators
+        # sample from intra-leaf marginals
+        # TO DO: sample new x_synth
+
+        # merge real and synthetic data
+        x = pd.concat([x_real, x_synth])
+        y = np.concatenate([np.zeros(x_real.shape[0]), np.ones(x_real.shape[0])])
+        
+        # discrimintator
+        clf_1 = RandomForestClassifier( oob_score= 'True', **kwargs) 
+        clf_1.fit(x, y)
+
+        # update iters and check for convergence
+        acc_1 = 1 - clf_1.oob_score_
+        print(f"Iteration number {iters} reached accuracy of {acc_1}.")
+        iters = iters + 1
+        if (acc_1 <= 0.5 + delta or iters >= max_iters):
+          converged = True
+        else:
+          clf_0 = clf_1
+    self.clf = clf_0
+        
+    
 
   def forde(self):
     # Get terminal nodes for all observations
@@ -95,7 +128,7 @@ class arf:
         self.class_probs = pd.concat([self.class_probs, res])
     return {"cnt": self.params, "cat": self.class_probs, 
             "forest": self.clf, "meta" : pd.DataFrame(data={"variable": self.orig_colnames, "family": self.dist})}
-  # TO DO: define parameters we want to return from density estimation
+  # TO DO: think again about the parameters we want to return from density estimation
   
   def forge(self, n):
     # Sample new observations and get their terminal nodes

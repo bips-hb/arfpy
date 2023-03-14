@@ -13,10 +13,6 @@ arf = arf.arf(x = df)
 
 # estimate density
 FORDE = arf.forde()
-FORDE['cnt']
-FORDE['cat']
-FORDE['forest']
-FORDE['meta']
 
 # generate data
 arf.forge(n =10)
