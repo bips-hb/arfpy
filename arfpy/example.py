@@ -1,18 +1,18 @@
 # this is an example
-from sklearn.datasets import load_iris
-import pandas as pd
+from sklearn.datasets import *
 import arf as arf
 import utils
+import pandas as pd
 
 # load data
 iris = load_iris()
 df = pd.DataFrame(iris['data'], columns=iris['feature_names'])
 
 # define ARF object
-arf = arf.arf(x = df)
+my_arf = arf.arf(x = df, delta=0)
 
 # estimate density
-FORDE = arf.forde()
+FORDE = my_arf.forde()
 
 # generate data
-arf.forge(n =10)
+my_arf.forge(n =10)

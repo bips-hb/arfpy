@@ -5,7 +5,11 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble._forest import _generate_unsampled_indices
 
 class arf:
-  """Adversarial RF"""
+  """Adversarial RF (ARF)
+  1. fit ARF model with arf()
+  2. estimate density with arf.forde()
+  3. generate data with arf.forge()
+  """
   def __init__(self, x, oob = False, dist = "normal", delta = 0,  max_iters =10, **kwargs):
     x_real = x.copy()
     self.p = x_real.shape[1]
@@ -39,7 +43,8 @@ class arf:
     # Merge real and synthetic data
     x = pd.concat([x_real, x_synth])
     y = np.concatenate([np.zeros(x_real.shape[0]), np.ones(x_real.shape[0])])
-    
+    # real observations = 0, synthetic observations = 1
+
     # pass on x_real
     self.x_real = x_real
 
@@ -48,17 +53,43 @@ class arf:
     clf_0.fit(x, y)
 
     iters = 0
-    acc_0 = 1 - clf_0.oob_score_
+    # TO DO -- fix Brier score / accuracy confusion
+    acc_0 = clf_0.oob_score_
     print(f'accuracy is {acc_0}')
     if (acc_0 > 0.5 + delta and iters < max_iters):
       converged = False
       while (not converged): # Start adversarial loop
         # get nodeIDs
-        nodeIDs = clf_0.apply(self.x_real)
-        # get number of trees 
-        num_trees = clf_0.n_estimators
-        # sample from intra-leaf marginals
-        # TO DO: sample new x_synth
+        nodeIDs = clf_0.apply(self.x_real) # dimension [terminalnode, tree]
+
+        # add observation ID to x_real
+        x_real_obs = x_real.copy()
+        x_real_obs['obs'] = range(0,x_real.shape[0])
+
+        # add observation ID to nodeIDs
+        nodeIDs_pd = pd.DataFrame(nodeIDs)
+        tmp = nodeIDs_pd.copy()
+        #tmp.columns = [ "tree" + str(c) for c in tmp.columns ]
+        tmp['obs'] = range(0,x_real.shape[0])
+        tmp = tmp.melt(id_vars=['obs'], value_name="leaf", var_name="tree")
+
+        # match real data to trees and leafs (node id for tree)
+        x_real_obs = pd.merge(left=x_real_obs, right=tmp, on=['obs'], sort=False)
+        x_real_obs.drop('obs', axis = 1, inplace= True)
+
+        # sample leafs
+        tmp.drop("obs", axis=1, inplace=True)
+        tmp = tmp.sample(x_real.shape[0], axis=0, replace=True)
+        tmp = pd.Series(tmp.value_counts(sort = False ), name = 'cnt').reset_index()
+        draw_from = pd.merge(left = tmp, right = x_real_obs, on=['tree', 'leaf'], sort=False )
+
+        # sample synthetic data from leaf
+        grpd =  draw_from.groupby(['tree', 'leaf'])
+        x_synth = [grpd.get_group(ind).apply(lambda x: x.sample(n=grpd.get_group(ind)['cnt'].iloc[0], replace = True).values) for ind in grpd.indices]
+        x_synth = pd.concat(x_synth).drop(['cnt', 'tree', 'leaf'], axis=1)
+        
+        # delete unnecessary objects 
+        del(nodeIDs, nodeIDs_pd, tmp, x_real_obs, draw_from)
 
         # merge real and synthetic data
         x = pd.concat([x_real, x_synth])
@@ -81,6 +112,8 @@ class arf:
     
 
   def forde(self):
+    """ for density estimation
+    """
     # Get terminal nodes for all observations
     pred = self.clf.apply(self.x_real)
     
@@ -131,6 +164,8 @@ class arf:
   # TO DO: think again about the parameters we want to return from density estimation
   
   def forge(self, n):
+    """ for data generation
+    """
     # Sample new observations and get their terminal nodes
     # nodeids dims: [new obs, tree]
     def myfun(x):
