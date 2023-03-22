@@ -5,17 +5,30 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble._forest import _generate_unsampled_indices
 
 class arf:
-  """Adversarial RF (ARF)
+  """Implements Adversarial Random Forests (ARF) in python
+  Usage:
   1. fit ARF model with arf()
   2. estimate density with arf.forde()
   3. generate data with arf.forge()
-  """
-  def __init__(self, x, oob = False, dist = "normal", delta = 0,  max_iters =10, early_stop = True, **kwargs):
+    
+  Attributes:
+    :param x: Input data.
+    :type x: pandas.Dataframe
+    :param delta: Tolerance parameter. Algorithm converges when OOB accuracy is < 0.5 + `delta`, defaults to 0
+    :type delta: int, optional
+    :param max_iters: Maximum iterations for the adversarial loop, defaults to 10
+    :type max_iters: int, optional
+    :param early_stop: Terminate loop if performance fails to improve from one round to the next?, defaults to True
+    :type early_stop: bool, optional
+    :param verbose: Print discriminator accuracy after each round?, defaults to True
+    :type verbose: bool, optional
+  """   
+  def __init__(self, x,  delta = 0,  max_iters =10, early_stop = True, verbose = True, **kwargs):
+ 
     x_real = x.copy()
     self.p = x_real.shape[1]
     self.orig_colnames = list(x_real)
-    self.dist = dist
-    self.oob = oob
+    
 
     # Find object columns and convert to category
     self.object_cols = x_real.dtypes == "object"
@@ -57,7 +70,9 @@ class arf:
     acc_0 = clf_0.oob_score_ # is accuracy directly
     acc = [acc_0]
 
-    print(f'Initial accuracy is {acc_0}')
+    if verbose is True:
+      print(f'Initial accuracy is {acc_0}')
+
     if (acc_0 > 0.5 + delta and iters < max_iters):
       converged = False
       while (not converged): # Start adversarial loop
@@ -108,7 +123,8 @@ class arf:
         
         iters = iters + 1
         plateau = True if early_stop is True and acc[iters] > acc[iters - 1] else False
-        print(f"Iteration number {iters} reached accuracy of {acc_1}.")
+        if verbose is True:
+          print(f"Iteration number {iters} reached accuracy of {acc_1}.")
         if (acc_1 <= 0.5 + delta or iters >= max_iters or plateau):
           converged = True
         else:
@@ -118,9 +134,20 @@ class arf:
         
     
 
-  def forde(self):
-    """ for density estimation
-    """
+  def forde(self, dist = "normal", oob = False):
+    """This part is for density estimation (FORDE)
+
+    :param dist: Distribution to use for density estimation of continuous features. Distributions implemented so far: "normal", defaults to "normal"
+    :type dist: str, optional
+    :param oob: Only use out-of-bag samples for parameter estimation? If `True`, `x` must be the same dataset used to train `arf`, defaults to False
+    :type oob: bool, optional
+    :return: Return parameters for the estimated density.
+    :rtype: dict
+    """    
+ 
+    self.dist = dist
+    self.oob = oob
+
     # Get terminal nodes for all observations
     pred = self.clf.apply(self.x_real)
     
@@ -171,7 +198,12 @@ class arf:
   # TO DO: think again about the parameters we want to return from density estimation
   
   def forge(self, n):
-    """ for data generation
+    """This part is for data generation.
+
+    :param n: Number of synthetic samples to generate.
+    :type n: int
+    :return: Returns generated data.
+    :rtype: pandas.DataFrame
     """
     # Sample new observations and get their terminal nodes
     # nodeids dims: [new obs, tree]
