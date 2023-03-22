@@ -14,6 +14,8 @@ class arf:
   Attributes:
     :param x: Input data.
     :type x: pandas.Dataframe
+    :param num_trees:  Number of trees to grow in each forest, defaults to 10
+    :type num_trees: int, optional
     :param delta: Tolerance parameter. Algorithm converges when OOB accuracy is < 0.5 + `delta`, defaults to 0
     :type delta: int, optional
     :param max_iters: Maximum iterations for the adversarial loop, defaults to 10
@@ -23,12 +25,12 @@ class arf:
     :param verbose: Print discriminator accuracy after each round?, defaults to True
     :type verbose: bool, optional
   """   
-  def __init__(self, x,  delta = 0,  max_iters =10, early_stop = True, verbose = True, **kwargs):
+  def __init__(self, x,  num_trees = 10, delta = 0,  max_iters =10, early_stop = True, verbose = True, **kwargs):
  
     x_real = x.copy()
     self.p = x_real.shape[1]
     self.orig_colnames = list(x_real)
-    
+    self.num_trees = num_trees
 
     # Find object columns and convert to category
     self.object_cols = x_real.dtypes == "object"
@@ -62,7 +64,7 @@ class arf:
     self.x_real = x_real
 
     # Fit initial RF model
-    clf_0 = RandomForestClassifier( oob_score= 'True', **kwargs) 
+    clf_0 = RandomForestClassifier( oob_score= 'True', n_estimators=self.num_trees, **kwargs) 
     clf_0.fit(x, y)
 
     iters = 0
@@ -113,7 +115,7 @@ class arf:
         y = np.concatenate([np.zeros(x_real.shape[0]), np.ones(x_real.shape[0])])
         
         # discrimintator
-        clf_1 = RandomForestClassifier( oob_score= 'True', **kwargs) 
+        clf_1 = RandomForestClassifier( oob_score= 'True', n_estimators=self.num_trees, **kwargs) 
         clf_1.fit(x, y)
 
         # update iters and check for convergence
@@ -150,8 +152,6 @@ class arf:
 
     # Get terminal nodes for all observations
     pred = self.clf.apply(self.x_real)
-    
-    self.num_trees = self.clf.n_estimators
     
     # If OOB, use only OOB trees
     if self.oob:
