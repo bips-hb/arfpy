@@ -10,7 +10,7 @@ class arf:
   2. estimate density with arf.forde()
   3. generate data with arf.forge()
   """
-  def __init__(self, x, oob = False, dist = "normal", delta = 0,  max_iters =10, **kwargs):
+  def __init__(self, x, oob = False, dist = "normal", delta = 0,  max_iters =10, early_stop = True, **kwargs):
     x_real = x.copy()
     self.p = x_real.shape[1]
     self.orig_colnames = list(x_real)
@@ -55,6 +55,7 @@ class arf:
     iters = 0
 
     acc_0 = clf_0.oob_score_ # is accuracy directly
+    acc = [acc_0]
 
     print(f'Initial accuracy is {acc_0}')
     if (acc_0 > 0.5 + delta and iters < max_iters):
@@ -102,14 +103,18 @@ class arf:
 
         # update iters and check for convergence
         acc_1 = clf_1.oob_score_
+        
+        acc.append(acc_1)
+        
         iters = iters + 1
+        plateau = True if early_stop is True and acc[iters] > acc[iters - 1] else False
         print(f"Iteration number {iters} reached accuracy of {acc_1}.")
-        if (acc_1 <= 0.5 + delta or iters >= max_iters):
+        if (acc_1 <= 0.5 + delta or iters >= max_iters or plateau):
           converged = True
-          print(f"Convergence reached after {iters} iterations")
         else:
           clf_0 = clf_1
     self.clf = clf_0
+    self.acc = acc 
         
     
 
