@@ -5,7 +5,7 @@ import utils
 import pandas as pd
 
 # load data
-iris = load_iris()
+iris =  load_iris() # try also load_digits() 
 df = pd.DataFrame(iris['data'], columns=iris['feature_names'])
 
 # define ARF object

@@ -53,9 +53,10 @@ class arf:
     clf_0.fit(x, y)
 
     iters = 0
-    # TO DO -- fix Brier score / accuracy confusion
-    acc_0 = clf_0.oob_score_
-    print(f'accuracy is {acc_0}')
+
+    acc_0 = clf_0.oob_score_ # is accuracy directly
+
+    print(f'Initial accuracy is {acc_0}')
     if (acc_0 > 0.5 + delta and iters < max_iters):
       converged = False
       while (not converged): # Start adversarial loop
@@ -100,11 +101,12 @@ class arf:
         clf_1.fit(x, y)
 
         # update iters and check for convergence
-        acc_1 = 1 - clf_1.oob_score_
-        print(f"Iteration number {iters} reached accuracy of {acc_1}.")
+        acc_1 = clf_1.oob_score_
         iters = iters + 1
+        print(f"Iteration number {iters} reached accuracy of {acc_1}.")
         if (acc_1 <= 0.5 + delta or iters >= max_iters):
           converged = True
+          print(f"Convergence reached after {iters} iterations")
         else:
           clf_0 = clf_1
     self.clf = clf_0
