@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble._forest import _generate_unsampled_indices
+import utils
 
 class arf:
   """Implements Adversarial Random Forests (ARF) in python
@@ -14,7 +15,7 @@ class arf:
   Attributes:
     :param x: Input data.
     :type x: pandas.Dataframe
-    :param num_trees:  Number of trees to grow in each forest, defaults to 10
+    :param num_trees:  Number of trees to grow in each forest, defaults to 50
     :type num_trees: int, optional
     :param delta: Tolerance parameter. Algorithm converges when OOB accuracy is < 0.5 + `delta`, defaults to 0
     :type delta: int, optional
@@ -25,7 +26,7 @@ class arf:
     :param verbose: Print discriminator accuracy after each round?, defaults to True
     :type verbose: bool, optional
   """   
-  def __init__(self, x,  num_trees = 10, delta = 0,  max_iters =10, early_stop = True, verbose = True, **kwargs):
+  def __init__(self, x,  num_trees = 50, delta = 0,  max_iters =10, early_stop = True, verbose = True, **kwargs):
  
     x_real = x.copy()
     self.p = x_real.shape[1]
@@ -161,12 +162,7 @@ class arf:
     
     # Get probabilities of terminal nodes for each tree 
     # node_probs dims: [nodeid, tree]
-    nbins = np.max(pred)
-    def my_bincount(x): 
-      res = np.bincount(x[x >= 0], minlength=nbins+1)
-      res[res == 1] = 0 # Avoid terminal nodes with just one obs
-      return res/np.sum(res)
-    self.node_probs = np.apply_along_axis(my_bincount, 0, pred)
+    self.node_probs = np.apply_along_axis(func1d= utils.bincount, axis = 0, arr =pred, nbins = np.max(pred))
     
     # Fit continuous distribution in all terminal nodes
     self.params = pd.DataFrame()
@@ -207,10 +203,7 @@ class arf:
     """
     # Sample new observations and get their terminal nodes
     # nodeids dims: [new obs, tree]
-    def myfun(x):
-      return np.random.choice(p = x, a = np.shape(self.node_probs)[0], size = n, replace = True)
-    nodeids = np.apply_along_axis(myfun, 0, self.node_probs)
-    
+    nodeids = np.apply_along_axis(func1d=utils.nodeid_choice, axis = 0, arr = self.node_probs,a = np.shape(self.node_probs)[0], size = n, replace = True )
     # Randomly select tree for each new obs. (mixture distribution with equal prob.)
     sampled_trees = np.random.choice(self.num_trees, size = n)
     sampled_nodes = np.zeros(n, dtype=int)
