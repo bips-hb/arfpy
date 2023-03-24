@@ -164,6 +164,27 @@ class arf:
     # node_probs dims: [nodeid, tree]
     self.node_probs = np.apply_along_axis(func1d= utils.bincount, axis = 0, arr =pred, nbins = np.max(pred))
     
+    # compute leaf bounds and coverage
+    bnds = pd.concat([utils.bnd_fun(tree=j, p = self.p, forest = self.clf, feature_names = self.orig_colnames) for j in range(self.num_trees)])
+    bnds['f_idx']= bnds.groupby(['tree', 'leaf']).ngroup()
+
+    bnds_2 = pd.DataFrame()
+    for t in range(self.num_trees):
+      unique, freq = np.unique(pred[:,t], return_counts=True)
+      vv = pd.concat([pd.Series(unique, name = 'leaf'), pd.Series(freq/pred.shape[0], name = 'cvg')], axis = 1)
+      zz = bnds[bnds['tree'] == t]
+      bnds_2 =pd.concat([bnds_2,pd.merge(left=vv, right=zz, on=['leaf'])])
+    bnds = bnds_2
+    del(bnds_2)
+
+    # set coverage for nodes with single observations to zero
+    if np.invert(self.factor_cols).any():
+      bnds.loc[bnds['cvg'] == 1/pred.shape[0],'cvg'] = 0
+
+    # TO DO: 
+    # - modify fitting of continuous distribution with coverage
+    # - modify fitting of categorical distribution with coverage + alpha
+
     # Fit continuous distribution in all terminal nodes
     self.params = pd.DataFrame()
     if np.invert(self.factor_cols).any():
@@ -206,9 +227,7 @@ class arf:
     nodeids = np.apply_along_axis(func1d=utils.nodeid_choice, axis = 0, arr = self.node_probs,a = np.shape(self.node_probs)[0], size = n, replace = True )
     # Randomly select tree for each new obs. (mixture distribution with equal prob.)
     sampled_trees = np.random.choice(self.num_trees, size = n)
-    sampled_nodes = np.zeros(n, dtype=int)
-    for i in range(n):
-      sampled_nodes[i] = nodeids[i, sampled_trees[i]]
+    sampled_nodes = np.array([nodeids[i,sampled_trees[i]] for i in range(n)])
     sampled_trees_nodes = pd.DataFrame({"obs":range(n), "tree":sampled_trees, "nodeid":sampled_nodes})
     
     # Get distributions parameters for each new obs.
