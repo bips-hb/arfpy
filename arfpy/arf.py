@@ -67,7 +67,7 @@ class arf:
     self.x_real = x_real
 
     # Fit initial RF model
-    clf_0 = RandomForestClassifier( oob_score= 'True', n_estimators=self.num_trees,min_samples_leaf=min_node_size, **kwargs) 
+    clf_0 = RandomForestClassifier( oob_score= True, n_estimators=self.num_trees,min_samples_leaf=min_node_size, **kwargs) 
     clf_0.fit(x, y)
 
     iters = 0
@@ -118,7 +118,7 @@ class arf:
         y = np.concatenate([np.zeros(x_real.shape[0]), np.ones(x_real.shape[0])])
         
         # discrimintator
-        clf_1 = RandomForestClassifier( oob_score= 'True', n_estimators=self.num_trees, min_samples_leaf=min_node_size,**kwargs) 
+        clf_1 = RandomForestClassifier( oob_score= True, n_estimators=self.num_trees, min_samples_leaf=min_node_size,**kwargs) 
         clf_1.fit(x, y)
 
         # update iters and check for convergence
