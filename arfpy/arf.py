@@ -25,8 +25,10 @@ class arf:
     :type early_stop: bool, optional
     :param verbose: Print discriminator accuracy after each round?, defaults to True
     :type verbose: bool, optional
+    :param min_node_size: minimum number of samples in terminal node, defaults to 2 
+    :type min_node_size: int
   """   
-  def __init__(self, x,  num_trees = 50, delta = 0,  max_iters =10, early_stop = True, verbose = True, **kwargs):
+  def __init__(self, x,  num_trees = 50, delta = 0,  max_iters =10, early_stop = True, verbose = True, min_node_size = 2, **kwargs):
  
     x_real = x.copy()
     self.p = x_real.shape[1]
@@ -65,7 +67,7 @@ class arf:
     self.x_real = x_real
 
     # Fit initial RF model
-    clf_0 = RandomForestClassifier( oob_score= 'True', n_estimators=self.num_trees, **kwargs) 
+    clf_0 = RandomForestClassifier( oob_score= 'True', n_estimators=self.num_trees,min_samples_leaf=min_node_size, **kwargs) 
     clf_0.fit(x, y)
 
     iters = 0
@@ -116,7 +118,7 @@ class arf:
         y = np.concatenate([np.zeros(x_real.shape[0]), np.ones(x_real.shape[0])])
         
         # discrimintator
-        clf_1 = RandomForestClassifier( oob_score= 'True', n_estimators=self.num_trees, **kwargs) 
+        clf_1 = RandomForestClassifier( oob_score= 'True', n_estimators=self.num_trees, min_samples_leaf=min_node_size,**kwargs) 
         clf_1.fit(x, y)
 
         # update iters and check for convergence
@@ -140,7 +142,7 @@ class arf:
   def forde(self, dist = "normal", oob = False):
     """This part is for density estimation (FORDE)
 
-    :param dist: Distribution to use for density estimation of continuous features. Distributions implemented so far: "normal", defaults to "normal"
+    :param dist: Distribution to use for density estimation of continuous features. Distributions implemented so far: "truncnormal", defaults to "truncnormal"
     :type dist: str, optional
     :param oob: Only use out-of-bag samples for parameter estimation? If `True`, `x` must be the same dataset used to train `arf`, defaults to False
     :type oob: bool, optional
@@ -180,11 +182,39 @@ class arf:
     # set coverage for nodes with single observations to zero
     if np.invert(self.factor_cols).any():
       bnds.loc[bnds['cvg'] == 1/pred.shape[0],'cvg'] = 0
+    
+    # no parameters to learn for zero coverage leaves - drop zero coverage nodes
+    bnds = bnds[bnds['cvg'] > 0]
+
 
     # TO DO: 
     # - modify fitting of continuous distribution with coverage
     # - modify fitting of categorical distribution with coverage + alpha
+    # code below is work in progress ##
 
+    # # Fit continuous distribution in all terminal nodes
+    # self.params = pd.DataFrame()
+    # if np.invert(self.factor_cols).any():
+    #   for tree in range(self.num_trees):
+    #     dt = self.x_real.loc[:, np.invert(self.factor_cols)].copy()
+    #     dt["tree"] = tree
+    #     dt["leaf"] = pred[:,tree]
+    #     # merge bounds and make it long format
+    #     long = pd.merge(right = bnds[['tree', 'leaf','variable', 'min', 'max', 'f_idx']], left = pd.melt(dt[dt["leaf"] >= 0], id_vars = ["tree", "leaf"]), on = ['tree', 'leaf', 'variable'], how = 'left')
+    #     # get distribution parameters
+    #     if self.dist == "truncnormal":
+    #       res = long.groupby(["tree", "leaf", "variable"], as_index = False).agg(mean=("value", "mean"), sd=("value", "std"))
+    #       if any(res.sd == 0):
+    #         tmp_res = res.copy()[res['sd'] == 0]
+    #         tmp_res = pd.merge(left = tmp_res, right = long, on = ['tree', 'leaf', 'variable']).groupby(['variable'], as_index = False)
+    #         tmp_res['new_min'] = [tmp_res.get_group(ind).apply(lambda x: if x['min'] == float('inf') or float(-'inf') ) for ind in tmp_res.indices] # not working, to do: make it work; add lines as in R
+
+    #     else:
+    #       raise ValueError('Other distributions not yet implemented')
+    #       exit()
+    #     self.params = pd.concat([self.params, res])
+
+    # THIS IS THE PREVIOUS VERSION -- just here such that code still runs, will be replaced with code above
     # Fit continuous distribution in all terminal nodes
     self.params = pd.DataFrame()
     if np.invert(self.factor_cols).any():
@@ -199,7 +229,6 @@ class arf:
           raise ValueError('Other distributions not yet implemented')
           exit()
         self.params = pd.concat([self.params, res])
-    
     # Calculate class probabilities for categorical data in all terminal nodes 
     self.class_probs = pd.DataFrame()
     if self.factor_cols.any():
