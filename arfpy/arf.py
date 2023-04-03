@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble._forest import _generate_unsampled_indices
+import scipy
 import utils
 
 class arf:
@@ -186,6 +187,9 @@ class arf:
     # no parameters to learn for zero coverage leaves - drop zero coverage nodes
     bnds = bnds[bnds['cvg'] > 0]
 
+    # rename leafs to nodeids
+    bnds.rename(columns={'leaf': 'nodeid'}, inplace=True)
+
 
     # Fit continuous distribution in all terminal nodes
     self.params = pd.DataFrame()
@@ -193,24 +197,24 @@ class arf:
       for tree in range(self.num_trees):
         dt = self.x_real.loc[:, np.invert(self.factor_cols)].copy()
         dt["tree"] = tree
-        dt["leaf"] = pred[:,tree]
+        dt["nodeid"] = pred[:,tree]
         # merge bounds and make it long format
-        long = pd.merge(right = bnds[['tree', 'leaf','variable', 'min', 'max', 'f_idx']], left = pd.melt(dt[dt["leaf"] >= 0], id_vars = ["tree", "leaf"]), on = ['tree', 'leaf', 'variable'], how = 'left')
+        long = pd.merge(right = bnds[['tree', 'nodeid','variable', 'min', 'max', 'f_idx']], left = pd.melt(dt[dt["nodeid"] >= 0], id_vars = ["tree", "nodeid"]), on = ['tree', 'nodeid', 'variable'], how = 'left')
         # get distribution parameters
         if self.dist == "truncnorm":
-          res = long.groupby([ 'tree',"leaf", "variable"], as_index = False).agg(mean=("value", "mean"), sd=("value", "std"))
+          res = long.groupby([ 'tree',"nodeid", "variable"], as_index = False).agg(mean=("value", "mean"), sd=("value", "std"), min = ("min", "min"), max = ("max", "max"))
+          
           if any(res.sd == 0):
             tmp_res = res.copy()[res['sd'] == 0]
             # save old mean
-            old_mean = tmp_res[[ 'tree','leaf', 'variable', 'mean']]
-            tmp_res = pd.merge(left = tmp_res, right = long, on = ['tree','leaf', 'variable'])
-            tmp_res['new_min'] = tmp_res.groupby(['tree','leaf','variable'], group_keys=False).apply(lambda x: np.where((x['min'] == float('inf')) | (x['min'] == float('-inf')), min(x['value']), x['min'])).explode().values
-            tmp_res['new_max'] = tmp_res.groupby(['tree','leaf','variable'], group_keys=False).apply(lambda x: np.where((x['max'] == float('inf')) | (x['max'] == float('-inf')), max(x['value']), x['max'])).explode().values
-            tmp_res["value"] =tmp_res.groupby(['tree','leaf','variable'], group_keys=False).apply(lambda x:  np.random.uniform(low=x['new_min'], high=x['new_max'], size = x['value'].shape)).explode().values
-            new_sd = tmp_res.groupby(['tree',"leaf", "variable"], as_index = False).agg(sd=("value", "std"))
-            resi = pd.merge(left = new_sd, right= old_mean, on=['tree','leaf','variable'])
+            old_mean = tmp_res[[ 'tree','nodeid', 'variable', 'mean']]
+            tmp_res = pd.merge(left = tmp_res, right = long, on = ['tree','nodeid', 'variable', 'min', 'max'])
+            tmp_res['new_min'] = tmp_res.groupby(['tree','nodeid','variable'], group_keys=False).apply(lambda x: np.where((x['min'] == float('inf')) | (x['min'] == float('-inf')), min(x['value']), x['min'])).explode().values
+            tmp_res['new_max'] = tmp_res.groupby(['tree','nodeid','variable'], group_keys=False).apply(lambda x: np.where((x['max'] == float('inf')) | (x['max'] == float('-inf')), max(x['value']), x['max'])).explode().values
+            tmp_res["value"] =tmp_res.groupby(['tree','nodeid','variable'], group_keys=False).apply(lambda x:  np.random.uniform(low=x['new_min'], high=x['new_max'], size = x['value'].shape)).explode().values
+            new_sd = tmp_res.groupby(['tree',"nodeid", "variable"], as_index = False).agg(sd=("value", "std"), min =("new_min", "min"), max = ("new_max", "max"))
+            resi = pd.merge(left = new_sd, right= old_mean, on=['tree','nodeid','variable'])
             res = pd.concat([res.copy()[res['sd'] != 0], resi])
-            res['nodeid'] = res['leaf']
             del(resi, new_sd,old_mean)
         else:
           raise ValueError('Other distributions not yet implemented')
@@ -272,7 +276,11 @@ class arf:
       else:
         # Continuous columns: Match estimated distribution parameters with r...() function
         if self.dist == "truncnorm":
-          data_new.loc[:, j] = np.random.normal(obs_params.loc[obs_params["variable"] == colname, "mean"], obs_params.loc[obs_params["variable"] == colname, "sd"], size = n)
+         # sample from normal distribution, only here for debugging
+         # data_new.loc[:, j] = np.random.normal(obs_params.loc[obs_params["variable"] == colname, "mean"], obs_params.loc[obs_params["variable"] == colname, "sd"], size = n) 
+         
+         # sample from truncated normal distribution
+         data_new.loc[:, j] = scipy.stats.truncnorm(a = obs_params.loc[obs_params["variable"] == colname, "min"],b = obs_params.loc[obs_params["variable"] == colname, "max"], loc =  obs_params.loc[obs_params["variable"] == colname, "mean"], scale = obs_params.loc[obs_params["variable"] == colname, "sd"]).rvs(size = n)
         else:
           raise ValueError('Other distributions not yet implemented')
     

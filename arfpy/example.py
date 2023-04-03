@@ -9,7 +9,7 @@ iris = load_iris() # try also load_digits()
 df = pd.DataFrame(iris['data'], columns=iris['feature_names'])
 
 # define ARF object
-my_arf = arf.arf(x = df, delta=0)
+my_arf = arf.arf(x = df, delta=0, min_node_size =50) ## note: node_size is so high because pruning is not implemented yet (ensures enough real observations in nodes)
 
 # estimate density
 FORDE = my_arf.forde()
@@ -26,7 +26,7 @@ colnames.append('target')
 df.columns = colnames
 df['target'] = df['target'].astype('category')
 # new arf
-my_arf = arf.arf(x = df, delta=0)
+my_arf = arf.arf(x = df, delta=0, min_node_size =50)
 # estimate density
 FORDE = my_arf.forde()
 

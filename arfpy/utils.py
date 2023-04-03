@@ -15,7 +15,7 @@ def bnd_fun(tree, p, forest, feature_names ):
     my_tree = forest.estimators_[tree].tree_
     num_nodes = my_tree.node_count
     lb = np.full(shape=(num_nodes, p), fill_value=float('-inf'))
-    ub = np.full(shape=(num_nodes, p), fill_value=float('-inf'))
+    ub = np.full(shape=(num_nodes, p), fill_value=float('inf'))
     for i in range(num_nodes):
         left_child = my_tree.children_left[i]
         right_child = my_tree.children_right[i]
