@@ -139,10 +139,10 @@ class arf:
         
     
 
-  def forde(self, dist = "normal", oob = False):
+  def forde(self, dist = "truncnorm", oob = False):
     """This part is for density estimation (FORDE)
 
-    :param dist: Distribution to use for density estimation of continuous features. Distributions implemented so far: "truncnormal", defaults to "truncnormal"
+    :param dist: Distribution to use for density estimation of continuous features. Distributions implemented so far: "truncnorm", defaults to "truncnorm"
     :type dist: str, optional
     :param oob: Only use out-of-bag samples for parameter estimation? If `True`, `x` must be the same dataset used to train `arf`, defaults to False
     :type oob: bool, optional
@@ -187,49 +187,42 @@ class arf:
     bnds = bnds[bnds['cvg'] > 0]
 
 
-    # TO DO: 
-    # - modify fitting of continuous distribution with coverage
-    # - modify fitting of categorical distribution with coverage + alpha
-    # code below is work in progress ##
-
-    # # Fit continuous distribution in all terminal nodes
-    # self.params = pd.DataFrame()
-    # if np.invert(self.factor_cols).any():
-    #   for tree in range(self.num_trees):
-    #     dt = self.x_real.loc[:, np.invert(self.factor_cols)].copy()
-    #     dt["tree"] = tree
-    #     dt["leaf"] = pred[:,tree]
-    #     # merge bounds and make it long format
-    #     long = pd.merge(right = bnds[['tree', 'leaf','variable', 'min', 'max', 'f_idx']], left = pd.melt(dt[dt["leaf"] >= 0], id_vars = ["tree", "leaf"]), on = ['tree', 'leaf', 'variable'], how = 'left')
-    #     # get distribution parameters
-    #     if self.dist == "truncnormal":
-    #       res = long.groupby(["tree", "leaf", "variable"], as_index = False).agg(mean=("value", "mean"), sd=("value", "std"))
-    #       if any(res.sd == 0):
-    #         tmp_res = res.copy()[res['sd'] == 0]
-    #         tmp_res = pd.merge(left = tmp_res, right = long, on = ['tree', 'leaf', 'variable']).groupby(['variable'], as_index = False)
-    #         tmp_res['new_min'] = [tmp_res.get_group(ind).apply(lambda x: if x['min'] == float('inf') or float(-'inf') ) for ind in tmp_res.indices] # not working, to do: make it work; add lines as in R
-
-    #     else:
-    #       raise ValueError('Other distributions not yet implemented')
-    #       exit()
-    #     self.params = pd.concat([self.params, res])
-
-    # THIS IS THE PREVIOUS VERSION -- just here such that code still runs, will be replaced with code above
     # Fit continuous distribution in all terminal nodes
     self.params = pd.DataFrame()
     if np.invert(self.factor_cols).any():
       for tree in range(self.num_trees):
         dt = self.x_real.loc[:, np.invert(self.factor_cols)].copy()
         dt["tree"] = tree
-        dt["nodeid"] = pred[:,tree]
-        long = pd.melt(dt[dt["nodeid"] >= 0], id_vars = ["tree", "nodeid"])
-        if self.dist == "normal":
-          res = long.groupby(["tree", "nodeid", "variable"], as_index = False).agg(mean=("value", "mean"), sd=("value", "std"))
+        dt["leaf"] = pred[:,tree]
+        # merge bounds and make it long format
+        long = pd.merge(right = bnds[['tree', 'leaf','variable', 'min', 'max', 'f_idx']], left = pd.melt(dt[dt["leaf"] >= 0], id_vars = ["tree", "leaf"]), on = ['tree', 'leaf', 'variable'], how = 'left')
+        # get distribution parameters
+        if self.dist == "truncnorm":
+          res = long.groupby([ 'tree',"leaf", "variable"], as_index = False).agg(mean=("value", "mean"), sd=("value", "std"))
+          if any(res.sd == 0):
+            tmp_res = res.copy()[res['sd'] == 0]
+            # save old mean
+            old_mean = tmp_res[[ 'tree','leaf', 'variable', 'mean']]
+            tmp_res = pd.merge(left = tmp_res, right = long, on = ['tree','leaf', 'variable'])
+            tmp_res['new_min'] = tmp_res.groupby(['tree','leaf','variable'], group_keys=False).apply(lambda x: np.where((x['min'] == float('inf')) | (x['min'] == float('-inf')), min(x['value']), x['min'])).explode().values
+            tmp_res['new_max'] = tmp_res.groupby(['tree','leaf','variable'], group_keys=False).apply(lambda x: np.where((x['max'] == float('inf')) | (x['max'] == float('-inf')), max(x['value']), x['max'])).explode().values
+            tmp_res["value"] =tmp_res.groupby(['tree','leaf','variable'], group_keys=False).apply(lambda x:  np.random.uniform(low=x['new_min'], high=x['new_max'], size = x['value'].shape)).explode().values
+            new_sd = tmp_res.groupby(['tree',"leaf", "variable"], as_index = False).agg(sd=("value", "std"))
+            resi = pd.merge(left = new_sd, right= old_mean, on=['tree','leaf','variable'])
+            res = pd.concat([res.copy()[res['sd'] != 0], resi])
+            res['nodeid'] = res['leaf']
+            del(resi, new_sd,old_mean)
         else:
           raise ValueError('Other distributions not yet implemented')
           exit()
         self.params = pd.concat([self.params, res])
-    # Calculate class probabilities for categorical data in all terminal nodes 
+
+    # TO DO: 
+
+    # - modify fitting of categorical distribution with coverage + alpha
+    # code below is work in progress ##
+    
+    # Get class probabilities in all terminal nodes
     self.class_probs = pd.DataFrame()
     if self.factor_cols.any():
       for tree in range(self.num_trees):
@@ -278,7 +271,7 @@ class arf:
 
       else:
         # Continuous columns: Match estimated distribution parameters with r...() function
-        if self.dist == "normal":
+        if self.dist == "truncnorm":
           data_new.loc[:, j] = np.random.normal(obs_params.loc[obs_params["variable"] == colname, "mean"], obs_params.loc[obs_params["variable"] == colname, "sd"], size = n)
         else:
           raise ValueError('Other distributions not yet implemented')
