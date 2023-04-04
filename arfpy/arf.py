@@ -137,7 +137,34 @@ class arf:
     self.clf = clf_0
     self.acc = acc 
         
-    
+    # Pruning
+    pred = self.clf.apply(self.x_real)
+    for tree_num in range(0, self.num_trees):
+      tree = self.clf.estimators_[tree_num]
+      left = tree.tree_.children_left
+      right = tree.tree_.children_right
+      leaves = np.where(left < 0)[0]
+
+      # get leaves that are too small
+      unique, counts = np.unique(pred[:, tree_num], return_counts=True)
+      to_prune = unique[counts < min_node_size]
+
+      # also add leaves with 0 obs.
+      to_prune = np.concatenate([to_prune, np.setdiff1d(leaves, unique)])
+
+      while len(to_prune) > 0:
+        for tp in to_prune:
+          # Find parent
+          parent = np.where(left == tp)[0]
+          if len(parent) > 0:
+            # Left child
+            left[parent] = right[parent]
+          else:
+            # Right child
+            parent = np.where(right == tp)[0]
+            right[parent] = left[parent]
+        # Prune again if child was pruned
+        to_prune = np.where(np.in1d(left, to_prune))[0]
 
   def forde(self, dist = "normal", oob = False):
     """This part is for density estimation (FORDE)
