@@ -26,9 +26,9 @@ colnames.append('target')
 df.columns = colnames
 df['target'] = df['target'].astype('category')
 # new arf
-my_arf = arf.arf(x = df, delta=0, min_node_size =50)
+my_arf = arf.arf(x = df, delta=0, min_node_size =5)
 # estimate density
-FORDE = my_arf.forde()
+FORDE = my_arf.forde(alpha = 0.5)
 
 # generate data
 my_arf.forge(n =10)

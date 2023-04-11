@@ -167,19 +167,22 @@ class arf:
         # Prune again if child was pruned
         to_prune = np.where(np.in1d(left, to_prune))[0]
 
-  def forde(self, dist = "truncnorm", oob = False):
+  def forde(self, dist = "truncnorm", oob = False, alpha = 0):
     """This part is for density estimation (FORDE)
 
     :param dist: Distribution to use for density estimation of continuous features. Distributions implemented so far: "truncnorm", defaults to "truncnorm"
     :type dist: str, optional
     :param oob: Only use out-of-bag samples for parameter estimation? If `True`, `x` must be the same dataset used to train `arf`, defaults to False
     :type oob: bool, optional
+    :param alpha: Optional pseudocount for Laplace smoothing of categorical features. This avoids zero-mass points when test data fall outside the support of training data. Effectively parametrizes a flat Dirichlet prior on multinomial likelihoods, defaults to 0
+    :type alpha: float, optional
     :return: Return parameters for the estimated density.
     :rtype: dict
     """    
  
     self.dist = dist
     self.oob = oob
+    self.alpha = alpha
 
     # Get terminal nodes for all observations
     pred = self.clf.apply(self.x_real)
@@ -247,11 +250,6 @@ class arf:
           raise ValueError('Other distributions not yet implemented')
           exit()
         self.params = pd.concat([self.params, res])
-
-    # TO DO: 
-
-    # - modify fitting of categorical distribution with coverage + alpha
-    # code below is work in progress ##
     
     # Get class probabilities in all terminal nodes
     self.class_probs = pd.DataFrame()
@@ -260,13 +258,46 @@ class arf:
         dt = self.x_real.loc[:, self.factor_cols].copy()
         dt["tree"] = tree
         dt["nodeid"] = pred[:,tree]
-        long = pd.melt(dt[dt["nodeid"] >= 0], id_vars = ["tree", "nodeid"])
-        res = long.value_counts(sort = False).rename('freq').reset_index()
-        self.class_probs = pd.concat([self.class_probs, res])
+        dt = pd.melt(dt[dt["nodeid"] >= 0], id_vars = ["tree", "nodeid"])
+        long = pd.merge(left = dt, right = bnds, on = ['tree','nodeid', 'variable'])
+        long['count_var'] = long.groupby(['tree', 'nodeid', 'variable'])['variable'].transform('count')
+        long['count_var_val'] = long.groupby(['tree', 'nodeid', 'variable', 'value'])['variable'].transform('count')
+        long.drop_duplicates(inplace=True)
+        if self.alpha == 0:
+          long['prob'] = long['count_var_val'] / long['count_var'] 
+        else:
+          # Define the range of each variable in each leaf
+          long['k'] = long.groupby(['variable'])['value'].transform('nunique')  
+          long.loc[long['min'] == float('-inf') , 'min'] = 0.5 - 1
+          long.loc[long['max'] == float('inf') , 'max'] = long['k'] + 0.5 - 1
+          long.loc[round(long['min'] % 1,2) != 0.5 , 'min'] = long['min'] - 0.5
+          long.loc[round(long['max'] % 1,2) != 0.5 , 'min'] = long['max'] + 0.5
+          long['k'] = long['max'] - long['min']  
+          # Enumerate each possible leaf-variable-value combo
+          tmp = long[['f_idx','tree', "nodeid", 'variable', 'min','max']].copy()
+          tmp['rep_min'] = tmp['min'] + 0.5 
+          tmp['rep_max'] = tmp['max'] - 0.5 
+          tmp['levels'] = tmp.apply(lambda row:  list(range(int(row['rep_min']), int(row['rep_max'] + 1))), axis=1)
+          tmp = tmp.explode('levels')
+          cat_val = pd.DataFrame(self.levels).melt()
+          cat_val['levels'] = cat_val['value'] 
+          tmp =  pd.merge(left = tmp, right = cat_val, on = ['variable', 'levels'])[['variable', 'f_idx','tree', "nodeid",'value']]
+          # populate count, k
+          tmp = pd.merge(left = tmp, right = long[['f_idx', 'variable', 'tree', "nodeid",'count_var', 'k']], on = ['f_idx', "nodeid", 'variable', 'tree'])
+          # Merge with long, set val_count = 0 for possible but unobserved levels
+          long = pd.merge(left = tmp, right = long, on = ['f_idx','tree',"nodeid",  'variable','value','count_var','k'], how = 'left')
+          long.loc[long['count_var_val'].isna(), 'count_var_val'] = 0
+          long = long[['f_idx','tree',"nodeid",  'variable', 'value', 'count_var_val', 'count_var', 'k']].drop_duplicates()
+          # Compute posterior probabilities
+          long['prob'] = (long['count_var_val'] + self.alpha) / (long['count_var'] + self.alpha*long['k'])
+          long['value'] = long['value'].astype('int8')
+        
+        long = long[['f_idx','tree', "nodeid", 'variable', 'value','prob']]
+        self.class_probs = pd.concat([self.class_probs, long])
     return {"cnt": self.params, "cat": self.class_probs, 
             "forest": self.clf, "meta" : pd.DataFrame(data={"variable": self.orig_colnames, "family": self.dist})}
   # TO DO: think again about the parameters we want to return from density estimation
-  
+  # TO DO: think of dropping f_idx
   def forge(self, n):
     """This part is for data generation.
 
@@ -277,8 +308,10 @@ class arf:
     """
     # Sample new observations and get their terminal nodes
     # nodeids dims: [new obs, tree]
+
     nodeids = np.apply_along_axis(func1d=utils.nodeid_choice, axis = 0, arr = self.node_probs,a = np.shape(self.node_probs)[0], size = n, replace = True )
     # Randomly select tree for each new obs. (mixture distribution with equal prob.)
+  # TO DO: # Draw random leaves with probability proportional to coverage
     sampled_trees = np.random.choice(self.num_trees, size = n)
     sampled_nodes = np.array([nodeids[i,sampled_trees[i]] for i in range(n)])
     sampled_trees_nodes = pd.DataFrame({"obs":range(n), "tree":sampled_trees, "nodeid":sampled_nodes})
@@ -298,7 +331,7 @@ class arf:
       
       if self.factor_cols[j]:
         # Factor columns: Multinomial distribution
-        data_new.loc[:, j] = obs_probs[obs_probs["variable"] == colname].groupby("obs").sample(weights = "freq")["value"].reset_index(drop = True)
+        data_new.loc[:, j] = obs_probs[obs_probs["variable"] == colname].groupby("obs").sample(weights = "prob")["value"].reset_index(drop = True)
 
       else:
         # Continuous columns: Match estimated distribution parameters with r...() function
