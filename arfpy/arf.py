@@ -68,7 +68,7 @@ class arf:
     self.x_real = x_real
 
     # Fit initial RF model
-    clf_0 = RandomForestClassifier( oob_score= 'True', n_estimators=self.num_trees,min_samples_leaf=min_node_size, **kwargs) 
+    clf_0 = RandomForestClassifier( oob_score= True, n_estimators=self.num_trees,min_samples_leaf=min_node_size, **kwargs) 
     clf_0.fit(x, y)
 
     iters = 0
@@ -119,7 +119,7 @@ class arf:
         y = np.concatenate([np.zeros(x_real.shape[0]), np.ones(x_real.shape[0])])
         
         # discrimintator
-        clf_1 = RandomForestClassifier( oob_score= 'True', n_estimators=self.num_trees, min_samples_leaf=min_node_size,**kwargs) 
+        clf_1 = RandomForestClassifier( oob_score= True, n_estimators=self.num_trees, min_samples_leaf=min_node_size,**kwargs) 
         clf_1.fit(x, y)
 
         # update iters and check for convergence
@@ -138,7 +138,34 @@ class arf:
     self.clf = clf_0
     self.acc = acc 
         
-    
+    # Pruning
+    pred = self.clf.apply(self.x_real)
+    for tree_num in range(0, self.num_trees):
+      tree = self.clf.estimators_[tree_num]
+      left = tree.tree_.children_left
+      right = tree.tree_.children_right
+      leaves = np.where(left < 0)[0]
+
+      # get leaves that are too small
+      unique, counts = np.unique(pred[:, tree_num], return_counts=True)
+      to_prune = unique[counts < min_node_size]
+
+      # also add leaves with 0 obs.
+      to_prune = np.concatenate([to_prune, np.setdiff1d(leaves, unique)])
+
+      while len(to_prune) > 0:
+        for tp in to_prune:
+          # Find parent
+          parent = np.where(left == tp)[0]
+          if len(parent) > 0:
+            # Left child
+            left[parent] = right[parent]
+          else:
+            # Right child
+            parent = np.where(right == tp)[0]
+            right[parent] = left[parent]
+        # Prune again if child was pruned
+        to_prune = np.where(np.in1d(left, to_prune))[0]
 
   def forde(self, dist = "truncnorm", oob = False):
     """This part is for density estimation (FORDE)
