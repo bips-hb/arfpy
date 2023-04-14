@@ -195,7 +195,7 @@ class arf:
     
     # Get probabilities of terminal nodes for each tree 
     # node_probs dims: [nodeid, tree]
-    self.node_probs = np.apply_along_axis(func1d= utils.bincount, axis = 0, arr =pred, nbins = np.max(pred))
+    #self.node_probs = np.apply_along_axis(func1d= utils.bincount, axis = 0, arr =pred, nbins = np.max(pred))
     
     # compute leaf bounds and coverage
     bnds = pd.concat([utils.bnd_fun(tree=j, p = self.p, forest = self.clf, feature_names = self.orig_colnames) for j in range(self.num_trees)])
@@ -220,7 +220,8 @@ class arf:
     # rename leafs to nodeids
     bnds.rename(columns={'leaf': 'nodeid'}, inplace=True)
 
-
+    # save bounds to later use coverage for drawing new samples
+    self.bnds= bnds
     # Fit continuous distribution in all terminal nodes
     self.params = pd.DataFrame()
     if np.invert(self.factor_cols).any():
@@ -307,15 +308,11 @@ class arf:
     :rtype: pandas.DataFrame
     """
     # Sample new observations and get their terminal nodes
-    # nodeids dims: [new obs, tree]
+    # Draw random leaves with probability proportional to coverage
+    unique_bnds = self.bnds[['tree', 'nodeid', 'cvg']].drop_duplicates()
+    draws = np.random.choice(a=range(unique_bnds.shape[0]), p = unique_bnds['cvg'] / self.num_trees, size=n)
+    sampled_trees_nodes = unique_bnds[['tree','nodeid']].iloc[draws,].reset_index(drop =True).reset_index().rename(columns={'index': 'obs'})
 
-    nodeids = np.apply_along_axis(func1d=utils.nodeid_choice, axis = 0, arr = self.node_probs,a = np.shape(self.node_probs)[0], size = n, replace = True )
-    # Randomly select tree for each new obs. (mixture distribution with equal prob.)
-  # TO DO: # Draw random leaves with probability proportional to coverage
-    sampled_trees = np.random.choice(self.num_trees, size = n)
-    sampled_nodes = np.array([nodeids[i,sampled_trees[i]] for i in range(n)])
-    sampled_trees_nodes = pd.DataFrame({"obs":range(n), "tree":sampled_trees, "nodeid":sampled_nodes})
-    
     # Get distributions parameters for each new obs.
     if np.invert(self.factor_cols).any():
       obs_params = pd.merge(sampled_trees_nodes, self.params, on = ["tree", "nodeid"]).sort_values(by=['obs'], ignore_index = True)

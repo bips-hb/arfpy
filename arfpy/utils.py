@@ -3,14 +3,6 @@
 import numpy as np 
 import pandas as pd
 
-def bincount(x, nbins): 
-    res = np.bincount(x[x >= 0], minlength=nbins+1)
-    res[res == 1] = 0 # Avoid terminal nodes with just one obs
-    return res/np.sum(res)
-
-def nodeid_choice(p, a, size, replace):
-    return np.random.choice(p = p, a = a, size = size, replace = replace)
-
 def bnd_fun(tree, p, forest, feature_names ):
     my_tree = forest.estimators_[tree].tree_
     num_nodes = my_tree.node_count
