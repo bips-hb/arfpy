@@ -16,7 +16,7 @@ class arf:
   Attributes:
     :param x: Input data.
     :type x: pandas.Dataframe
-    :param num_trees:  Number of trees to grow in each forest, defaults to 10
+    :param num_trees:  Number of trees to grow in each forest, defaults to 30
     :type num_trees: int, optional
     :param delta: Tolerance parameter. Algorithm converges when OOB accuracy is < 0.5 + `delta`, defaults to 0
     :type delta: int, optional
@@ -26,10 +26,10 @@ class arf:
     :type early_stop: bool, optional
     :param verbose: Print discriminator accuracy after each round?, defaults to True
     :type verbose: bool, optional
-    :param min_node_size: minimum number of samples in terminal node, defaults to 2 
+    :param min_node_size: minimum number of samples in terminal node, defaults to 5 
     :type min_node_size: int
   """   
-  def __init__(self, x,  num_trees = 10, delta = 0,  max_iters =10, early_stop = True, verbose = True, min_node_size = 2, **kwargs):
+  def __init__(self, x,  num_trees = 30, delta = 0,  max_iters =10, early_stop = True, verbose = True, min_node_size = 5, **kwargs):
  
     x_real = x.copy()
     self.p = x_real.shape[1]
@@ -240,8 +240,12 @@ class arf:
             # save old mean
             old_mean = tmp_res[[ 'tree','nodeid', 'variable', 'mean']]
             tmp_res = pd.merge(left = tmp_res, right = long, on = ['tree','nodeid', 'variable', 'min', 'max'])
-            tmp_res['new_min'] = tmp_res.groupby(['tree','nodeid','variable'], group_keys=False).apply(lambda x: np.where((x['min'] == float('inf')) | (x['min'] == float('-inf')), min(x['value']), x['min'])).explode().values
-            tmp_res['new_max'] = tmp_res.groupby(['tree','nodeid','variable'], group_keys=False).apply(lambda x: np.where((x['max'] == float('inf')) | (x['max'] == float('-inf')), max(x['value']), x['max'])).explode().values
+           # tmp_res['new_min'] = tmp_res.groupby(['tree','nodeid','variable'], group_keys=False).apply(lambda x: np.where((x['min'] == float('inf')) | (x['min'] == float('-inf')), min(x['value']), x['min'])).explode().values
+           # tmp_res['new_max'] = tmp_res.groupby(['tree','nodeid','variable'], group_keys=False).apply(lambda x: np.where((x['max'] == float('inf')) | (x['max'] == float('-inf')), max(x['value']), x['max'])).explode().values
+
+            tmp_res['new_min'] = tmp_res.groupby(['variable'], group_keys=False).apply(lambda x: np.where((x['min'] == float('inf')) | (x['min'] == float('-inf')), min(x['value']), x['min'])).explode().values
+            tmp_res['new_max'] = tmp_res.groupby(['variable'], group_keys=False).apply(lambda x: np.where((x['max'] == float('inf')) | (x['max'] == float('-inf')), max(x['value']), x['max'])).explode().values
+            
             tmp_res["value"] =tmp_res.groupby(['tree','nodeid','variable'], group_keys=False).apply(lambda x:  np.random.uniform(low=x['new_min'], high=x['new_max'], size = x['value'].shape)).explode().values
             new_sd = tmp_res.groupby(['tree',"nodeid", "variable"], as_index = False).agg(sd=("value", "std"), min =("new_min", "min"), max = ("new_max", "max"))
             resi = pd.merge(left = new_sd, right= old_mean, on=['tree','nodeid','variable'])
