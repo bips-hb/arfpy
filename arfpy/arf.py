@@ -240,8 +240,6 @@ class arf:
             # save old mean
             old_mean = tmp_res[[ 'tree','nodeid', 'variable', 'mean']]
             tmp_res = pd.merge(left = tmp_res, right = long, on = ['tree','nodeid', 'variable', 'min', 'max'])
-           # tmp_res['new_min'] = tmp_res.groupby(['tree','nodeid','variable'], group_keys=False).apply(lambda x: np.where((x['min'] == float('inf')) | (x['min'] == float('-inf')), min(x['value']), x['min'])).explode().values
-           # tmp_res['new_max'] = tmp_res.groupby(['tree','nodeid','variable'], group_keys=False).apply(lambda x: np.where((x['max'] == float('inf')) | (x['max'] == float('-inf')), max(x['value']), x['max'])).explode().values
 
             tmp_res['new_min'] = tmp_res.groupby(['variable'], group_keys=False).apply(lambda x: np.where((x['min'] == float('inf')) | (x['min'] == float('-inf')), min(x['value']), x['min'])).explode().values
             tmp_res['new_max'] = tmp_res.groupby(['variable'], group_keys=False).apply(lambda x: np.where((x['max'] == float('inf')) | (x['max'] == float('-inf')), max(x['value']), x['max'])).explode().values
