@@ -16,7 +16,7 @@ class arf:
   Attributes:
     :param x: Input data.
     :type x: pandas.Dataframe
-    :param num_trees:  Number of trees to grow in each forest, defaults to 50
+    :param num_trees:  Number of trees to grow in each forest, defaults to 10
     :type num_trees: int, optional
     :param delta: Tolerance parameter. Algorithm converges when OOB accuracy is < 0.5 + `delta`, defaults to 0
     :type delta: int, optional
@@ -29,7 +29,7 @@ class arf:
     :param min_node_size: minimum number of samples in terminal node, defaults to 2 
     :type min_node_size: int
   """   
-  def __init__(self, x,  num_trees = 50, delta = 0,  max_iters =10, early_stop = True, verbose = True, min_node_size = 2, **kwargs):
+  def __init__(self, x,  num_trees = 10, delta = 0,  max_iters =10, early_stop = True, verbose = True, min_node_size = 2, **kwargs):
  
     x_real = x.copy()
     self.p = x_real.shape[1]
@@ -337,7 +337,12 @@ class arf:
          # data_new.loc[:, j] = np.random.normal(obs_params.loc[obs_params["variable"] == colname, "mean"], obs_params.loc[obs_params["variable"] == colname, "sd"], size = n) 
          
          # sample from truncated normal distribution
-         data_new.loc[:, j] = scipy.stats.truncnorm(a = obs_params.loc[obs_params["variable"] == colname, "min"],b = obs_params.loc[obs_params["variable"] == colname, "max"], loc =  obs_params.loc[obs_params["variable"] == colname, "mean"], scale = obs_params.loc[obs_params["variable"] == colname, "sd"]).rvs(size = n)
+         myclip_a = obs_params.loc[obs_params["variable"] == colname, "min"]
+         myclip_b = obs_params.loc[obs_params["variable"] == colname, "max"]
+         myloc = obs_params.loc[obs_params["variable"] == colname, "mean"]
+         myscale = obs_params.loc[obs_params["variable"] == colname, "sd"]
+         data_new.loc[:, j] = scipy.stats.truncnorm(a =(myclip_a - myloc) / myscale,b = (myclip_b - myloc) / myscale, loc = myloc , scale = myscale ).rvs(size = n)
+         del(myclip_a,myclip_b,myloc,myscale)
         else:
           raise ValueError('Other distributions not yet implemented')
     
