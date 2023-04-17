@@ -10,7 +10,7 @@ setuptools.setup(
         long_description_content_type="text/markdown",
     packages=['arfpy'],
     url='https://github.com/bips-hb/arfpy',
-    license='MIT',
+    license='GPLv3',
     python_requires='>=3.9',
     install_requires= ['numpy','pandas','scikit-learn','scipy'],
                        
