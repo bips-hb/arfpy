@@ -4,7 +4,7 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble._forest import _generate_unsampled_indices
 import scipy
-import utils
+from arfpy import utils
 
 class arf:
   """Implements Adversarial Random Forests (ARF) in python
@@ -310,7 +310,6 @@ class arf:
     """
     try:
       getattr(self, 'bnds')
-      print("yes")
     except AttributeError:
       raise AttributeError('need density estimates to generate data -- run .forde() first!')
 

@@ -22,10 +22,10 @@ Using Fisher's iris dataset, we train an ARF, estimate distribution parameters a
 ```python
 
 from sklearn.datasets import load_iris
-import arf
+from arfpy import arf
 import pandas as pd
 
-# load data
+# Load data
 iris = load_iris() 
 df = pd.DataFrame(iris['data'], columns=iris['feature_names'])
 
@@ -41,7 +41,7 @@ my_arf.forge(n = 10)
 ```
 
 ## Other distributions
-An R implementation of ARF is available on [CRAN] (https://cran.r-project.org/web/packages/arf/index.html) and the development version  [here](https://github.com/bips-hb/arf/).
+An R implementation of ARF is available on [CRAN](https://cran.r-project.org/web/packages/arf/index.html) and the development version  [here](https://github.com/bips-hb/arf/).
 
 ## References
 * Watson, D. S., Blesch, K., Kapar, J. & Wright, M. N. (2022). Adversarial random forests for density estimation and generative modeling. To appear in *Proceedings of the 26th International Conference on Artificial Intelligence and Statistics*. Preprint: https://arxiv.org/abs/2205.09435.
