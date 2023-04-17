@@ -299,8 +299,7 @@ class arf:
         self.class_probs = pd.concat([self.class_probs, long])
     return {"cnt": self.params, "cat": self.class_probs, 
             "forest": self.clf, "meta" : pd.DataFrame(data={"variable": self.orig_colnames, "family": self.dist})}
-  # TO DO: think again about the parameters we want to return from density estimation
-  # TO DO: think of dropping f_idx
+  # TO DO: optional -- think of dropping f_idx
   def forge(self, n):
     """This part is for data generation.
 
@@ -309,6 +308,12 @@ class arf:
     :return: Returns generated data.
     :rtype: pandas.DataFrame
     """
+    try:
+      getattr(self, 'bnds')
+      print("yes")
+    except AttributeError:
+      raise AttributeError('need density estimates to generate data -- run .forde() first!')
+
     # Sample new observations and get their terminal nodes
     # Draw random leaves with probability proportional to coverage
     unique_bnds = self.bnds[['tree', 'nodeid', 'cvg']].drop_duplicates()
