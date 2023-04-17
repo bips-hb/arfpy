@@ -17,18 +17,22 @@ sys.path.insert(0, os.path.abspath('..'))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'arfpy'
-copyright = '2023, Kristin Blesch, Marvin N. Wright'
-author = 'Kristin Blesch, Marvin N. Wright'
+copyright = '2023, Kristin Blesch'
+author = 'Kristin Blesch'
 release = '0.1.0'
+
+
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
+    "myst_parser",
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon']
 
+source_suffix = ['.rst', '.md']
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
@@ -39,3 +43,9 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
+
+html_theme_options = {
+    'navigation_depth': -1,
+    'includehidden': True,
+    'collapse_navigation': False
+}

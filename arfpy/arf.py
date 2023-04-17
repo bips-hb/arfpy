@@ -11,23 +11,22 @@ class arf:
   Usage:
   1. fit ARF model with arf()
   2. estimate density with arf.forde()
-  3. generate data with arf.forge()
-    
-  Attributes:
-    :param x: Input data.
-    :type x: pandas.Dataframe
-    :param num_trees:  Number of trees to grow in each forest, defaults to 30
-    :type num_trees: int, optional
-    :param delta: Tolerance parameter. Algorithm converges when OOB accuracy is < 0.5 + `delta`, defaults to 0
-    :type delta: int, optional
-    :param max_iters: Maximum iterations for the adversarial loop, defaults to 10
-    :type max_iters: int, optional
-    :param early_stop: Terminate loop if performance fails to improve from one round to the next?, defaults to True
-    :type early_stop: bool, optional
-    :param verbose: Print discriminator accuracy after each round?, defaults to True
-    :type verbose: bool, optional
-    :param min_node_size: minimum number of samples in terminal node, defaults to 5 
-    :type min_node_size: int
+  3. generate data with arf.forge().
+
+  :param x: Input data.
+  :type x: pandas.Dataframe
+  :param num_trees:  Number of trees to grow in each forest, defaults to 30
+  :type num_trees: int, optional
+  :param delta: Tolerance parameter. Algorithm converges when OOB accuracy is < 0.5 + `delta`, defaults to 0
+  :type delta: int, optional
+  :param max_iters: Maximum iterations for the adversarial loop, defaults to 10
+  :type max_iters: int, optional
+  :param early_stop: Terminate loop if performance fails to improve from one round to the next?, defaults to True
+  :type early_stop: bool, optional
+  :param verbose: Print discriminator accuracy after each round?, defaults to True
+  :type verbose: bool, optional
+  :param min_node_size: minimum number of samples in terminal node, defaults to 5 
+  :type min_node_size: int
   """   
   def __init__(self, x,  num_trees = 30, delta = 0,  max_iters =10, early_stop = True, verbose = True, min_node_size = 5, **kwargs):
  
@@ -301,7 +300,7 @@ class arf:
             "forest": self.clf, "meta" : pd.DataFrame(data={"variable": self.orig_colnames, "family": self.dist})}
   # TO DO: optional -- think of dropping f_idx
   def forge(self, n):
-    """This part is for data generation.
+    """This part is for data generation (FORGE)
 
     :param n: Number of synthetic samples to generate.
     :type n: int
