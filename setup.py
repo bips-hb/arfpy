@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="arfpy",
-    version = "0.1.6",
+    version = "0.1.0",
     author= "Kristin Blesch, Marvin N. Wright",
     author_email= "blesch@leibniz-bips.de",
     description="Adversarial random forests for density estimation and generative modeling",

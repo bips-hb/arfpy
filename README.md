@@ -6,7 +6,7 @@ This is a python implementation of adversarial random forests (ARFs) for density
 
 
 ## Installation
-The `arf` package is available on [PyPI](https://pypi.org/):
+The `arf` package is available on [PyPI](https://pypi.org/project/arfpy/):
 ```bash
 $ pip install arfpy
 ```
