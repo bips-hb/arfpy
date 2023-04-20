@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="arfpy",
-    version = "0.1.1",
+    version = "0.1.6",
     author= "Kristin Blesch, Marvin N. Wright",
     author_email= "blesch@leibniz-bips.de",
     description="Adversarial random forests for density estimation and generative modeling",
@@ -11,9 +11,8 @@ setuptools.setup(
     packages=['arfpy'],
     url='https://github.com/bips-hb/arfpy',
     license='GPLv3',
-    python_requires='>=3.9',
-    install_requires= ['numpy','pandas','scikit-learn','scipy'],
+    install_requires= ['numpy>=1.20, <1.24','pandas>=1.4, <2','scikit-learn>=0.24','scipy>=1.4'],
                        
-    classifiers=["Operating System :: Unix", 
+    classifiers=["Programming Language :: Python :: 3.8",
                  "Programming Language :: Python :: 3.9"]
 )

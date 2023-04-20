@@ -1,6 +1,6 @@
 # this is an example
 from sklearn.datasets import load_iris
-import arf
+from arfpy import arf
 import pandas as pd
 
 # load data
