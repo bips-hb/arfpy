@@ -43,10 +43,10 @@ my_arf.forge(n = 10)
 For a detailed documentation on `arfpy`'s functionalities, please have a look at this [website](https://bips-hb.github.io/arfpy/). 
 
 ## Other distributions
-An R implementation of ARF is available on [CRAN](https://cran.r-project.org/web/packages/arf/index.html) and the development version  [here](https://github.com/bips-hb/arf/).
+An R implementation of ARF is available on [CRAN](https://cran.r-project.org/web/packages/arf/index.html). For the development version, see [here](https://github.com/bips-hb/arf/).
 
 ## Contributing
 If you'd like to contribute,  please open an issue or submit a pull request. For further questions, please don't hesitate to write an email to Kristin Blesch (blesch@leibniz-bips.de). 
 
 ## References
-* Watson, D. S., Blesch, K., Kapar, J. & Wright, M. N. (2022). Adversarial random forests for density estimation and generative modeling. To appear in *Proceedings of the 26th International Conference on Artificial Intelligence and Statistics*. Preprint: https://arxiv.org/abs/2205.09435.
+* Watson, D. S., Blesch, K., Kapar, J. & Wright, M. N. (2023). Adversarial random forests for density estimation and generative modeling. In *Proceedings of the 26th International Conference on Artificial Intelligence and Statistics*. Link [here](https://proceedings.mlr.press/v206/watson23a.html).
