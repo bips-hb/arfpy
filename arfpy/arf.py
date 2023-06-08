@@ -233,21 +233,6 @@ class arf:
         # get distribution parameters
         if self.dist == "truncnorm":
           res = long.groupby([ 'tree',"nodeid", "variable"], as_index = False).agg(mean=("value", "mean"), sd=("value", "std"), min = ("min", "min"), max = ("max", "max"))
-          
-          if any(res.sd == 0):
-            tmp_res = res.copy()[res['sd'] == 0]
-            # save old mean
-            old_mean = tmp_res[[ 'tree','nodeid', 'variable', 'mean']]
-            tmp_res = pd.merge(left = tmp_res, right = long, on = ['tree','nodeid', 'variable', 'min', 'max'])
-
-            tmp_res['new_min'] = tmp_res.groupby(['variable'], group_keys=False).apply(lambda x: np.where((x['min'] == float('inf')) | (x['min'] == float('-inf')), min(x['value']), x['min'])).explode().values
-            tmp_res['new_max'] = tmp_res.groupby(['variable'], group_keys=False).apply(lambda x: np.where((x['max'] == float('inf')) | (x['max'] == float('-inf')), max(x['value']), x['max'])).explode().values
-            
-            tmp_res["value"] =tmp_res.groupby(['tree','nodeid','variable'], group_keys=False).apply(lambda x:  np.random.uniform(low=x['new_min'], high=x['new_max'], size = x['value'].shape)).explode().values
-            new_sd = tmp_res.groupby(['tree',"nodeid", "variable"], as_index = False).agg(sd=("value", "std"), min =("new_min", "min"), max = ("new_max", "max"))
-            resi = pd.merge(left = new_sd, right= old_mean, on=['tree','nodeid','variable'])
-            res = pd.concat([res.copy()[res['sd'] != 0], resi])
-            del(resi, new_sd,old_mean)
         else:
           raise ValueError('Other distributions not yet implemented')
           exit()
@@ -342,6 +327,8 @@ class arf:
          # data_new.loc[:, j] = np.random.normal(obs_params.loc[obs_params["variable"] == colname, "mean"], obs_params.loc[obs_params["variable"] == colname, "sd"], size = n) 
          
          # sample from truncated normal distribution
+         # note: if sd == 0, truncnorm will return location parameter -> this is desired; if we have 
+         # all obs. in that leave having the same value, we sample a new obs. with exactly that value as well
          myclip_a = obs_params.loc[obs_params["variable"] == colname, "min"]
          myclip_b = obs_params.loc[obs_params["variable"] == colname, "max"]
          myloc = obs_params.loc[obs_params["variable"] == colname, "mean"]
