@@ -15,7 +15,7 @@ To install the development version from GitHub, run:
 git clone https://bips-hb.github.io/arfpy/
 python setup.py install
 ```
-We recommend to use `python>=3.8` with `pandas==1.4.0, numpy==1.21.0, scikit-learn==0.24.0` and `scipy==1.7.1`, see [requirements.txt](https://github.com/bips-hb/arfpy/blob/master/requirements.txt) for more details. 
+We recommend to use `python>=3.8` with the dependencies specified in [requirements.txt](https://github.com/bips-hb/arfpy/blob/master/requirements.txt). 
 
 ## Usage
 Using Fisher's iris dataset, we train an ARF, estimate distribution parameters and generate new data:
