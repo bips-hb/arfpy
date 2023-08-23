@@ -11,7 +11,7 @@ setuptools.setup(
     packages=['arfpy'],
     url='https://github.com/bips-hb/arfpy',
     license='MIT',
-    install_requires= ['numpy>=1.20, <1.24','pandas>=1.4, <2','scikit-learn>=0.24','scipy>=1.4'],
+    install_requires= ['numpy>=1.20','pandas>=1.4','scikit-learn>=0.24','scipy>=1.4'],
                        
     classifiers=["Programming Language :: Python :: 3.8",
                  "Programming Language :: Python :: 3.9"]

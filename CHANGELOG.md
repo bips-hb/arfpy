@@ -10,3 +10,4 @@
 
 - Update License to MIT
 - Allow for variables with zero standard deviation in terminal nodes 
+- (23/08/2023) modify code to lighten dependency requirements: allow for numpy >=1.24 and pandas >= 2.0

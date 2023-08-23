@@ -318,7 +318,7 @@ class arf:
       
       if self.factor_cols[j]:
         # Factor columns: Multinomial distribution
-        data_new.loc[:, j] = obs_probs[obs_probs["variable"] == colname].groupby("obs").sample(weights = "prob")["value"].reset_index(drop = True)
+        data_new.isetitem(j, obs_probs[obs_probs["variable"] == colname].groupby("obs").sample(weights = "prob")["value"].reset_index(drop = True))
 
       else:
         # Continuous columns: Match estimated distribution parameters with r...() function
@@ -333,13 +333,13 @@ class arf:
          myclip_b = obs_params.loc[obs_params["variable"] == colname, "max"]
          myloc = obs_params.loc[obs_params["variable"] == colname, "mean"]
          myscale = obs_params.loc[obs_params["variable"] == colname, "sd"]
-         data_new.loc[:, j] = scipy.stats.truncnorm(a =(myclip_a - myloc) / myscale,b = (myclip_b - myloc) / myscale, loc = myloc , scale = myscale ).rvs(size = n)
+         data_new.isetitem(j, scipy.stats.truncnorm(a =(myclip_a - myloc) / myscale,b = (myclip_b - myloc) / myscale, loc = myloc , scale = myscale ).rvs(size = n))
          del(myclip_a,myclip_b,myloc,myscale)
         else:
           raise ValueError('Other distributions not yet implemented')
     
     # Use original column names
-    data_new.set_axis(self.orig_colnames, axis = 1, inplace = True)
+    data_new = data_new.set_axis(self.orig_colnames, axis = 1, copy = False)
     
     # Convert categories back to category   
     for col in self.orig_colnames:
