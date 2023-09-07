@@ -11,9 +11,8 @@ from test import TestClass
 class TestDiabetes(TestClass, unittest.TestCase):
     diabetes = load_diabetes() 
     df = pd.DataFrame(diabetes['data'], columns=diabetes['feature_names'])
-    
     my_arf = arf.arf(x = df)
-    my_arf.forde()
+    FORDE = my_arf.forde()
     n = df.shape[0]
     gen_df = my_arf.forge(n = n)
     

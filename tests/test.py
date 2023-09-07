@@ -1,14 +1,30 @@
 import numpy as np
+import pandas as pd
+from arfpy import arf
+import sklearn
 import unittest
 
 # this script provides automated tests for arfpy
 
-# run this script if you want to test arfpy on multiple datasets
+# run this script from command line if you want to test arfpy on multiple datasets
 # if you want to test arfpy on individual datasets, you can run the scripts imported here directly, e.g. test_iris.py for only iris data 
 
 class TestClass:
     def __init__(self, *args,**kwargs):
         super().__init__(*args,**kwargs)
+
+    # test FORDE output for type and names
+    def test_forde_type(self):
+        self.assertIsInstance(self.FORDE, dict,  'FORDE output is not a dict')
+        assert self.FORDE.keys() == {'cnt', 'cat', 'forest', 'meta'}
+        self.assertIsInstance(self.FORDE['cnt'], pd.core.frame.DataFrame, 'FORDE output of continuous variables is not a data frame')
+        self.assertIsInstance(self.FORDE['cat'], pd.core.frame.DataFrame,  'FORDE output of categorical variables is not a data frame')
+        self.assertIsInstance(self.FORDE['forest'], sklearn.ensemble._forest.RandomForestClassifier,  'FORDE output of forest is not a sklearn forest')
+        self.assertIsInstance(self.FORDE['meta'], pd.core.frame.DataFrame,  'FORDE output of meta data is not data frame')
+    
+    # test type of FORGE output
+    def test_forge_type(self):
+        self.assertIsInstance(self.gen_df, pd.core.frame.DataFrame)
 
     # number of generated instances = number of instances that should be generated?
     def test_instance_generation(self):
@@ -26,13 +42,23 @@ class TestClass:
     def test_colummnames(self):
         self.assertCountEqual(self.gen_df.columns, self.df.columns, 'Mismatch in original and generated column names')
 
-    # summary statistics of original and generated data  -- do they look similar? (rough measure of performance)
-    def test_summary_statistics(self):
-        with np.printoptions(threshold=np.inf):
-            print('\nComparing the data distributions:')
-            print(f'Summary statistics for original data \n{self.df.describe()}')
-            print(f'Summary statistics for generated data \n{self.gen_df.describe()} ')
+    # test whether probabilities for categorical variables sum to 1
+    def test_probs_sum_to_one(self):
+        if self.FORDE['cat'].shape[0] > 0: # if any categoricals
+            self.assertTrue(all(np.isclose(self.FORDE['cat'].groupby(['f_idx', 'variable']).sum('prob')['prob'],1)), 'probabilities of categoricals do not sum to one')
 
+    # test whether num_trees argument gets parsed correctly to sklearn.RandomForest
+    def test_num_trees(self):
+        tmp_num_trees = 40
+        tmp_arf = arf.arf(x = self.my_arf.x_real, num_trees=tmp_num_trees) # refit arf with new specifications
+        self.assertEqual(tmp_arf.clf.n_estimators, tmp_num_trees, "number of trees in arf do not correspond to parameter")
+
+    # test whether min_node_size argument gets parsed correctly to sklearn.RandomForest
+    def test_min_node_size(self):
+        tmp_min_node_size = 20
+        tmp_arf = arf.arf(x = self.my_arf.x_real, min_node_size=tmp_min_node_size) # refit arf with new specifications
+        self.assertEqual(tmp_arf.clf.min_samples_leaf, tmp_min_node_size, "minimum node size in arf does not correspond to parameter")
+    
 
 # run all tests
 if __name__ == '__main__':
