@@ -18,7 +18,7 @@ class arf:
   :param num_trees:  Number of trees to grow in each forest, defaults to 30
   :type num_trees: int, optional
   :param delta: Tolerance parameter. Algorithm converges when OOB accuracy is < 0.5 + `delta`, defaults to 0
-  :type delta: int, optional
+  :type delta: float, optional
   :param max_iters: Maximum iterations for the adversarial loop, defaults to 10
   :type max_iters: int, optional
   :param early_stop: Terminate loop if performance fails to improve from one round to the next?, defaults to True
