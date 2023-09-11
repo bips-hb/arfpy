@@ -4,19 +4,23 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>arfpy package &mdash; arfpy 0.1.0 documentation</title>
+  <title>arfpy package &mdash; arfpy 0.1.1 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=87f11076"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="&lt;no title&gt;" href="examples.html" />
     <link rel="prev" title="arfpy" href="modules.html" /> 
 </head>
 
@@ -61,6 +65,10 @@
 </li>
 </ul>
 </li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Data Examples:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="examples/twomoons.html">Twomoons data example</a></li>
 </ul>
 
         </div>
@@ -109,7 +117,7 @@ Usage:
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<em>pandas.Dataframe</em>) – Input data.</p></li>
 <li><p><strong>num_trees</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of trees to grow in each forest, defaults to 30</p></li>
-<li><p><strong>delta</strong> (<em>int</em><em>, </em><em>optional</em>) – Tolerance parameter. Algorithm converges when OOB accuracy is &lt; 0.5 + <cite>delta</cite>, defaults to 0</p></li>
+<li><p><strong>delta</strong> (<em>float</em><em>, </em><em>optional</em>) – Tolerance parameter. Algorithm converges when OOB accuracy is &lt; 0.5 + <cite>delta</cite>, defaults to 0</p></li>
 <li><p><strong>max_iters</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum iterations for the adversarial loop, defaults to 10</p></li>
 <li><p><strong>early_stop</strong> (<em>bool</em><em>, </em><em>optional</em>) – Terminate loop if performance fails to improve from one round to the next?, defaults to True</p></li>
 <li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – Print discriminator accuracy after each round?, defaults to True</p></li>
@@ -176,6 +184,7 @@ Usage:
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="modules.html" class="btn btn-neutral float-left" title="arfpy" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="examples.html" class="btn btn-neutral float-right" title="&lt;no title&gt;" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

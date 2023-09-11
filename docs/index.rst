@@ -10,10 +10,11 @@ This is a python implementation of adversarial random forests (ARFs) for density
 
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
    :caption: Module Documentation:
 
    modules
+
    
 
 
@@ -63,6 +64,18 @@ Using Fisher's iris dataset, we train an ARF, estimate distribution parameters a
 
    # Generate data
    my_arf.forge(n = 10)
+
+
+
+------------------
+
+Here are some examples that illustrate how ARF works.
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Data Examples:
+
+   examples
 
 
 Other distributions
