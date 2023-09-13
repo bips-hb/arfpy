@@ -12,7 +12,7 @@ $ pip install arfpy
 ```
 To install the development version from GitHub, run:
 ```bash
-git clone https://bips-hb.github.io/arfpy/
+git clone https://github.com/bips-hb/arfpy
 python setup.py install
 ```
 We recommend to use `python>=3.8` with the dependencies specified in [requirements.txt](https://github.com/bips-hb/arfpy/blob/master/requirements.txt). 
