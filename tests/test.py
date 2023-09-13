@@ -59,7 +59,15 @@ class TestClass:
         tmp_arf = arf.arf(x = self.my_arf.x_real, min_node_size=tmp_min_node_size) # refit arf with new specifications
         self.assertEqual(tmp_arf.clf.min_samples_leaf, tmp_min_node_size, "minimum node size in arf does not correspond to parameter")
     
-
+    # test for errors raised in case of misspecified arguments
+    def test_errors(self):
+        with self.assertRaises(ValueError):
+            self.my_arf.forde(dist = "misspelleddistribution")
+        with self.assertRaises(AssertionError):
+            arf.arf(x = pd.concat([self.my_arf.x_real,self.my_arf.x_real], axis =1))
+        with self.assertRaises(AssertionError):
+            arf.arf(x = np.array(self.my_arf.x_real))
+        
 # run all tests
 if __name__ == '__main__':
     from test_iris import TestIris

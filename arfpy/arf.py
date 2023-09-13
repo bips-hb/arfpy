@@ -29,7 +29,12 @@ class arf:
   :type min_node_size: int
   """   
   def __init__(self, x,  num_trees = 30, delta = 0,  max_iters =10, early_stop = True, verbose = True, min_node_size = 5, **kwargs):
- 
+
+    # assertions
+    assert isinstance(x, pd.core.frame.DataFrame), f"expected pandas DataFrame as input, got:{type(x)}"
+    assert len(set(list(x))) == x.shape[1], f"every column must have a unique column name"
+
+    # initialize values 
     x_real = x.copy()
     self.p = x_real.shape[1]
     self.orig_colnames = list(x_real)
@@ -234,7 +239,7 @@ class arf:
         if self.dist == "truncnorm":
           res = long.groupby([ 'tree',"nodeid", "variable"], as_index = False).agg(mean=("value", "mean"), sd=("value", "std"), min = ("min", "min"), max = ("max", "max"))
         else:
-          raise ValueError('Other distributions not yet implemented')
+          raise ValueError('unknown distribution, make sure to enter a vaild value for dist')
           exit()
         self.params = pd.concat([self.params, res])
     
