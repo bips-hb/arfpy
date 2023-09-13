@@ -21,7 +21,7 @@ This is a python implementation of adversarial random forests (ARFs) for density
 Installation
 ------------------
 
-The ``arf`` package is available on `PyPI`_. 
+The ``arfpy`` package is available on `PyPI`_. 
 
 
 .. _PyPI:  https://pypi.org/
@@ -36,7 +36,7 @@ To install the development version from GitHub, run:
 
 ::
 
-   $ git clone https://bips-hb.github.io/arfpy/
+   $ git clone https://github.com/bips-hb/arfpy
    $ python setup.py install
 
 
@@ -69,13 +69,36 @@ Using Fisher's iris dataset, we train an ARF, estimate distribution parameters a
 
 ------------------
 
-Here are some examples that illustrate how ARF works.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Data Examples:
+   :hidden:
+   :caption: Examples
 
    examples
+
+
+Examples
+------------------
+
+Generative modeling with `twomoons data`_:
+
+.. _twomoons data: https://bips-hb.github.io/arfpy/examples/twomoons.html
+
+.. image:: examples/examples_twomoons_11_0.png
+
+Generative modeling with `digit zero data`_:
+
+.. _digit zero data: https://bips-hb.github.io/arfpy/examples/digits.html
+
+.. image:: examples/examples_digits_9_0.png
+.. image:: examples/examples_digits_9_1.png
+
+Generative modeling and density estimation with `multivariate normal data`_:
+
+.. _multivariate normal data: https://bips-hb.github.io/arfpy/examples/mvnorm.html
+
+.. image:: examples/examples_mvnorm_11_0.png
 
 
 Other distributions
@@ -92,8 +115,9 @@ The development version of this package is on `GitHub`_.
 References
 ------------------
 
-Watson, D. S., Blesch, K., Kapar, J. & Wright, M. N. (2022). Adversarial random forests for density estimation and generative modeling. To appear in *Proceedings of the 26th International Conference on Artificial Intelligence and Statistics*. Preprint: https://arxiv.org/abs/2205.09435.
+Watson, D. S., Blesch, K., Kapar, J. & Wright, M. N. (2023). Adversarial random forests for density estimation and generative modeling. In *Proceedings of the 26th International Conference on Artificial Intelligence and Statistics*. Link here_.
 
+.. _here: https://proceedings.mlr.press/v206/watson23a.html
 
 Indices and tables
 ==================
