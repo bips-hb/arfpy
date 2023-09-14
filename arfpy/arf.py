@@ -33,6 +33,11 @@ class arf:
     # assertions
     assert isinstance(x, pd.core.frame.DataFrame), f"expected pandas DataFrame as input, got:{type(x)}"
     assert len(set(list(x))) == x.shape[1], f"every column must have a unique column name"
+    assert max_iters >= 0, f"negative number of iterations is not allowed: parameter max_iters must be >= 0"
+    assert min_node_size > 0, f"minimum number of samples in terminal nodes (parameter min_node_size) must be greater than zero"
+    assert num_trees > 0, f"number of trees in the random forest (parameter num_trees) must be greater than zero"
+    assert 0 <= delta <= 0.5, f"parameter delta must be in range 0 <= delta <= 0.5"
+
 
     # initialize values 
     x_real = x.copy()
