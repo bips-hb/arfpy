@@ -199,7 +199,7 @@ class arf:
     # If OOB, use only OOB trees
     if self.oob:
       for tree in range(self.num_trees):
-        idx_oob = np.isin(range(self.x_real.shape[0]), _generate_unsampled_indices(self.clf.estimators_[tree].random_state, x.shape[0], x.shape[0]))
+        idx_oob = np.isin(range(self.x_real.shape[0]), _generate_unsampled_indices(self.clf.estimators_[tree].random_state, self.x.shape[0], self.x.shape[0]))
         pred[np.invert(idx_oob), tree] = -1
     
     # Get probabilities of terminal nodes for each tree 
