@@ -53,4 +53,4 @@ An R implementation of ARF is available on [CRAN](https://cran.r-project.org/web
 If you'd like to contribute, please have a look at our [contributing guidelines](https://github.com/bips-hb/arfpy/blob/master/CONTRIBUTING.md).
 
 ## References
-* Watson, D. S., Blesch, K., Kapar, J. & Wright, M. N. (2023). Adversarial random forests for density estimation and generative modeling. In *Proceedings of the 26th International Conference on Artificial Intelligence and Statistics*. Link [here](https://proceedings.mlr.press/v206/watson23a.html).
+* Watson, D. S., Blesch, K., Kapar, J. & Wright, M. N. (2023). Adversarial random forests for density estimation and generative modeling. In *Proceedings of the 26th International Conference on Artificial Intelligence and Statistics*, PMLR 206:5357-5375. Link [here](https://proceedings.mlr.press/v206/watson23a.html).
