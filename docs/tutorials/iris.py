@@ -1,4 +1,5 @@
-# this is an example
+# this is an example that illustrates the usage of arfpy with iris data
+
 from sklearn.datasets import load_iris
 from arfpy import arf
 import pandas as pd
