@@ -88,7 +88,7 @@
     "\n",
     "What this data frame tells us is the following: \n",
     "\n",
-    "The first column `tree` indicates the tree in the forest.  Note that there will see parameters for 30 trees because we have used the default value for `num_trees = 30` in the ARF. The second column `nodeid` gives the unique identifier to each leaf (terminal node) in the respective forest. We are interested in those parameters because we know that if the forest has converged, it is reasonable to assume that the variables in those terminal nodes are mutually independent. So to get to the joint density, we can use these univariate densities and apply some basic probability theory instead of having to model the multivariate density directly. \n",
+    "The first column `tree` indicates the tree in the forest.  Note that we get parameters for 30 trees because we have used the default value for `num_trees = 30` in the ARF. The second column `nodeid` gives the unique identifier to each leaf (terminal node) in the respective forest. We are interested in those parameters because we know that if the forest has converged, it is reasonable to assume that the variables in those terminal nodes are mutually independent. So to get to the joint density, we can use these univariate densities and apply some basic probability theory instead of having to model the multivariate density directly. \n",
     "\n",
     "Recap that we have generated two variables that are named `var1` and`var2`. We have column `variable` indicating for which of the variables the parameters are estimated. Finally, the estimated parameters for the mean (`mean`) and standard deviation (`sd`) are given in respective columns of the table. "
    ]
@@ -322,8 +322,7 @@
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
    "version": "3.8.8"
-  },
-  "orig_nbformat": 4
+  }
  },
  "nbformat": 4,
  "nbformat_minor": 2

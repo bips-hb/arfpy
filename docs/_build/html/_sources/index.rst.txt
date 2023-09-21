@@ -32,7 +32,10 @@ The ``arfpy`` package is available on `PyPI`_.
 
    $ pip install arfpy
 
-To install the development version from GitHub, run:
+
+The development version of this package is available on `GitHub`_. To install the development version, run:
+
+.. _GitHub: https://github.com/bips-hb/arfpy/ 
 
 ::
 
@@ -108,14 +111,17 @@ An R implementation of ARF is available on `CRAN`_.
 
 .. _CRAN:  https://cran.r-project.org/web/packages/arf/index.html 
 
-The development version of this package is on `GitHub`_. 
 
-.. _GitHub: https://github.com/bips-hb/arfpy/
+
+Funding
+------------------
+This work was supported by the German Research Foundation (DFG), Emmy Noether Grant 437611051.
+
 
 References
 ------------------
 
-Watson, D. S., Blesch, K., Kapar, J. & Wright, M. N. (2023). Adversarial random forests for density estimation and generative modeling. In *Proceedings of the 26th International Conference on Artificial Intelligence and Statistics*. Link here_.
+Watson, D. S., Blesch, K., Kapar, J. & Wright, M. N. (2023). Adversarial random forests for density estimation and generative modeling. In *Proceedings of the 26th International Conference on Artificial Intelligence and Statistics*, PMLR 206:5357-5375. Link here_.
 
 .. _here: https://proceedings.mlr.press/v206/watson23a.html
 
