@@ -59,7 +59,29 @@ class TestClass:
         tmp_arf = arf.arf(x = self.my_arf.x_real, min_node_size=tmp_min_node_size) # refit arf with new specifications
         self.assertEqual(tmp_arf.clf.min_samples_leaf, tmp_min_node_size, "minimum node size in arf does not correspond to parameter")
     
-
+    # test whether assertion errors are raised
+    def test_assertion_errors(self):
+        with self.assertRaises(ValueError):
+            self.my_arf.forde(dist = "misspelleddistribution")
+        with self.assertRaises(AssertionError) as msg:
+            arf.arf(x = pd.concat([self.my_arf.x_real,self.my_arf.x_real], axis =1))
+        self.assertEqual(str(msg.exception), "every column must have a unique column name")
+        with self.assertRaises(AssertionError) as msg:
+            arf.arf(x = np.array(self.my_arf.x_real))
+        self.assertEqual(str(msg.exception), f"expected pandas DataFrame as input, got:{type(np.array(self.my_arf.x_real))}")
+        with self.assertRaises(AssertionError) as msg:
+            arf.arf(x = self.my_arf.x_real, min_node_size=-1)
+        self.assertEqual(str(msg.exception), "minimum number of samples in terminal nodes (parameter min_node_size) must be greater than zero")
+        with self.assertRaises(AssertionError) as msg:
+            arf.arf(x = self.my_arf.x_real, num_trees=-1)
+        self.assertEqual(str(msg.exception), "number of trees in the random forest (parameter num_trees) must be greater than zero")
+        with self.assertRaises(AssertionError) as msg:
+            arf.arf(x = self.my_arf.x_real, delta=-1)
+        self.assertEqual(str(msg.exception), "parameter delta must be in range 0 <= delta <= 0.5")
+        with self.assertRaises(AssertionError) as msg:
+            arf.arf(x = self.my_arf.x_real, max_iters=-1)
+        self.assertEqual(str(msg.exception), "negative number of iterations is not allowed: parameter max_iters must be >= 0")
+        
 # run all tests
 if __name__ == '__main__':
     from test_iris import TestIris

@@ -29,7 +29,17 @@ class arf:
   :type min_node_size: int
   """   
   def __init__(self, x,  num_trees = 30, delta = 0,  max_iters =10, early_stop = True, verbose = True, min_node_size = 5, **kwargs):
- 
+
+    # assertions
+    assert isinstance(x, pd.core.frame.DataFrame), f"expected pandas DataFrame as input, got:{type(x)}"
+    assert len(set(list(x))) == x.shape[1], f"every column must have a unique column name"
+    assert max_iters >= 0, f"negative number of iterations is not allowed: parameter max_iters must be >= 0"
+    assert min_node_size > 0, f"minimum number of samples in terminal nodes (parameter min_node_size) must be greater than zero"
+    assert num_trees > 0, f"number of trees in the random forest (parameter num_trees) must be greater than zero"
+    assert 0 <= delta <= 0.5, f"parameter delta must be in range 0 <= delta <= 0.5"
+
+
+    # initialize values 
     x_real = x.copy()
     self.p = x_real.shape[1]
     self.orig_colnames = list(x_real)
@@ -189,7 +199,7 @@ class arf:
     # If OOB, use only OOB trees
     if self.oob:
       for tree in range(self.num_trees):
-        idx_oob = np.isin(range(self.x_real.shape[0]), _generate_unsampled_indices(self.clf.estimators_[tree].random_state, x.shape[0], x.shape[0]))
+        idx_oob = np.isin(range(self.x_real.shape[0]), _generate_unsampled_indices(self.clf.estimators_[tree].random_state, self.x.shape[0], self.x.shape[0]))
         pred[np.invert(idx_oob), tree] = -1
     
     # Get probabilities of terminal nodes for each tree 
@@ -234,7 +244,7 @@ class arf:
         if self.dist == "truncnorm":
           res = long.groupby([ 'tree',"nodeid", "variable"], as_index = False).agg(mean=("value", "mean"), sd=("value", "std"), min = ("min", "min"), max = ("max", "max"))
         else:
-          raise ValueError('Other distributions not yet implemented')
+          raise ValueError('unknown distribution, make sure to enter a vaild value for dist')
           exit()
         self.params = pd.concat([self.params, res])
     
