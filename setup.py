@@ -14,5 +14,7 @@ setuptools.setup(
     install_requires= ['numpy>=1.20.3','pandas>=1.5','scikit-learn>=0.24','scipy>=1.4'],
                        
     classifiers=["Programming Language :: Python :: 3.8",
-                 "Programming Language :: Python :: 3.9"]
+                 "Programming Language :: Python :: 3.9",
+                 "Programming Language :: Python :: 3.10",
+                 "Programming Language :: Python :: 3.11"]
 )
