@@ -13,9 +13,10 @@ authors:
   orcid: 0000-0001-6241-3079
   corresponding: yes
   affiliation: 1, 2
+  
 - name: Marvin N. Wright
-- orcid: 0000-0002-8542-6291
-  affiliation: 1,2,3
+  orcid: 0000-0002-8542-6291
+  affiliation: 1, 2, 3
 
 bibliography: references.bib
 aas-doi: 10.3847/xxxxx <- update this with the DOI from AAS once you know it.
