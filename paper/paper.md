@@ -6,7 +6,7 @@ tags:
 - generative modeling
 - random forest
 - data sythesis
-date: "22 September 2023"
+date: 22 September 2023
 output: pdf_document
 authors:
 - name: Kristin Blesch
