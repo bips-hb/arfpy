@@ -4,7 +4,7 @@
 ## Introduction
 This is a python implementation of adversarial random forests (ARFs) for density estimation and generative modelling. Adversarial random forests (ARFs) recursively partition data into fully factorized leaves, where features are jointly independent. The procedure is iterative, with alternating rounds of generation and discrimination. Data become increasingly realistic at each round, until original and synthetic samples can no longer be reliably distinguished. This is useful for several unsupervised learning tasks, such as density estimation and data synthesis. Methods for both are implemented in this package. ARFs naturally handle unstructured data with mixed continuous and categorical covariates. They inherit many of the benefits of RFs, including speed, flexibility, and solid performance with default parameters. 
 
-**Documentation** of our code and further examples are provided on this [website](https://bips-hb.github.io/arfpy/). 
+**Documentation** of our code and further examples are provided on this [website](https://bips-hb.github.io/arfpy/) and there's also a tutorial paper available [here](https://arxiv.org/abs/2311.07366).   
 
 ## Installation
 The `arfpy` package is available on [PyPI](https://pypi.org/project/arfpy/):
@@ -65,5 +65,9 @@ An R implementation of ARF is available on [CRAN](https://cran.r-project.org/web
 ## Funding 
 This work was supported by the German Research Foundation (DFG), Emmy Noether Grant 437611051.
 
+## Citation
+When using this software, please cite Blesch, K. & Wright, M. N. (2023). arfpy: A python package for density estimation and generative modeling with adversarial random forests. *arXiv preprint arXiv:2311.07366*. Link [here](https://arxiv.org/abs/2311.07366).
+
 ## References
+* Blesch, K. & Wright, M. N. (2023). arfpy: A python package for density estimation and generative modeling with adversarial random forests. *arXiv preprint arXiv:2311.07366*. Link [here](https://arxiv.org/abs/2311.07366).
 * Watson, D. S., Blesch, K., Kapar, J. & Wright, M. N. (2023). Adversarial random forests for density estimation and generative modeling. In *Proceedings of the 26th International Conference on Artificial Intelligence and Statistics*, PMLR 206:5357-5375. Link [here](https://proceedings.mlr.press/v206/watson23a.html).
