@@ -174,7 +174,7 @@ class arf:
             parent = np.where(right == tp)[0]
             right[parent] = left[parent]
         # Prune again if child was pruned
-        to_prune = np.where(np.in1d(left, to_prune))[0]
+        to_prune = np.where(np.isin(left, to_prune))[0]
 
   def forde(self, dist = "truncnorm", oob = False, alpha = 0):
     """This part is for density estimation (FORDE)
@@ -326,7 +326,7 @@ class arf:
     for j in range(self.p): 
       colname = self.orig_colnames[j]
       
-      if self.factor_cols[j]:
+      if self.factor_cols.iloc[j]:
         # Factor columns: Multinomial distribution
         data_new.isetitem(j, obs_probs[obs_probs["variable"] == colname].groupby("obs").sample(weights = "prob")["value"].reset_index(drop = True))
 

@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## Unreleased
+
+- Fix compatibility with NumPy 2 and pandas 3 (`np.in1d` → `np.isin`, positional Series access via `.iloc`)
+- Migrate packaging from `setup.py` to `pyproject.toml` (uv / hatchling)
+- Fix the twomoons example notebook: define a held-out `df_test` via `train_test_split` and drop a redundant resampling step
+
 ## v0.1.0 (17/04/2023)
 
 - First release of `arfpy`
