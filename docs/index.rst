@@ -35,8 +35,9 @@ To install the development version from GitHub, run:
 
 ::
 
-   $ git clone https://bips-hb.github.io/arfpy/
-   $ python setup.py install
+   $ git clone https://github.com/bips-hb/arfpy
+   $ cd arfpy
+   $ pip install .
 
 
 Usage

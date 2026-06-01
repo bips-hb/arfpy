@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath('..'))
 project = 'arfpy'
 copyright = '2023, Kristin Blesch'
 author = 'Kristin Blesch'
-release = '0.1.0'
+release = '0.1.1'
 
 
 
