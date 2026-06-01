@@ -45,7 +45,7 @@ class TestClass:
     # test whether probabilities for categorical variables sum to 1
     def test_probs_sum_to_one(self):
         if self.FORDE['cat'].shape[0] > 0: # if any categoricals
-            self.assertTrue(all(np.isclose(self.FORDE['cat'].groupby(['f_idx', 'variable']).sum('prob')['prob'],1)), 'probabilities of categoricals do not sum to one')
+            self.assertTrue(all(np.isclose(self.FORDE['cat'].groupby(['f_idx', 'variable'])['prob'].sum(),1)), 'probabilities of categoricals do not sum to one')
 
     # test whether num_trees argument gets parsed correctly to sklearn.RandomForest
     def test_num_trees(self):
