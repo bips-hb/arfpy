@@ -34,8 +34,8 @@ The sections below outline the steps in each case.
 1. If needed, fork the repository to your own Github profile and create your own feature branch off of the latest main commit. While working on your feature branch, make sure to stay up to date with the main branch by pulling in changes, possibly from the 'upstream' repository (follow the instructions [here](https://help.github.com/articles/configuring-a-remote-for-a-fork/) and [here](https://help.github.com/articles/syncing-a-fork/));
 1. Set up the development environment with [uv](https://docs.astral.sh/uv/): run `uv sync` in the repository root to create a virtual environment with all dependencies installed;
 1. Make sure the existing automated tests run. To do so, run `` uv run python tests/test.py`` in your command line;
-1. Add your own tests (if necessary) to the [tests](https://github.com/bips-hb/arfpy/tree/master/tests) folder;
-1. Update or expand the documentation in the [docs](https://github.com/bips-hb/arfpy/tree/master/docs) folder;
+1. Add your own tests (if necessary) to the [tests](https://github.com/bips-hb/arfpy/tree/main/tests) folder;
+1. Update or expand the documentation in the [docs](https://github.com/bips-hb/arfpy/tree/main/docs) folder;
 1. Push your feature branch to (your fork of) the repository on GitHub;
 1. Create a [pull request](https://help.github.com/articles/creating-a-pull-request/)
 

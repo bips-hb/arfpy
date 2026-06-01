@@ -43,15 +43,15 @@ my_arf.forge(n = 10)
 
 ```
 ## Example
-Let's generate some data with `arfpy`! We here use twomoons data to showcase data synthesis. You can find the twomoons example as a [tutorial here](https://bips-hb.github.io/arfpy/examples/twomoons.html). For your convenience, we provide this and other examples as jupyter notebooks in the [tutorial folder](https://github.com/bips-hb/arfpy/tree/master/docs/tutorials).
+Let's generate some data with `arfpy`! We here use twomoons data to showcase data synthesis. You can find the twomoons example as a [tutorial here](https://bips-hb.github.io/arfpy/examples/twomoons.html). For your convenience, we provide this and other examples as jupyter notebooks in the [tutorial folder](https://github.com/bips-hb/arfpy/tree/main/docs/tutorials).
 
 ![Twomoons example: real data versus data synthesized with arfpy](docs/figures/twomoons.png)
 
 ## Contributing
-If you'd like to contribute, please have a look at our [contributing guidelines](https://github.com/bips-hb/arfpy/blob/master/CONTRIBUTING.md).
+If you'd like to contribute, please have a look at our [contributing guidelines](https://github.com/bips-hb/arfpy/blob/main/CONTRIBUTING.md).
 
 ## Tests
-We have a GitHub actions workflow running for automated testing of our software. If you'd like to run these tests manually, you can do this by executing the files in the [tests](https://github.com/bips-hb/arfpy/tree/master/tests) folder. The file `test.py` provides the tests and if sourced, runs the tests consecutively on several datasets. 
+We have a GitHub actions workflow running for automated testing of our software. If you'd like to run these tests manually, you can do this by executing the files in the [tests](https://github.com/bips-hb/arfpy/tree/main/tests) folder. The file `test.py` provides the tests and if sourced, runs the tests consecutively on several datasets. 
 
 ```bash
 cd tests
