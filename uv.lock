@@ -51,7 +51,7 @@ dev = [
 requires-dist = [
     { name = "numpy", specifier = ">=1.23" },
     { name = "pandas", specifier = ">=2.0" },
-    { name = "scikit-learn", specifier = ">=1.1" },
+    { name = "scikit-learn", specifier = ">=1.5" },
     { name = "scipy", specifier = ">=1.7" },
 ]
 

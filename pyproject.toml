@@ -13,7 +13,7 @@ authors = [
 dependencies = [
     "numpy>=1.23",
     "pandas>=2.0",
-    "scikit-learn>=1.1",
+    "scikit-learn>=1.5",
     "scipy>=1.7",
 ]
 classifiers = [
