@@ -14,9 +14,10 @@ $ pip install arfpy
 To install the development version from GitHub, run:
 ```bash
 git clone https://github.com/bips-hb/arfpy
-python setup.py install
+cd arfpy
+pip install .
 ```
-We recommend to use `python>=3.8` with the dependencies specified in [requirements.txt](https://github.com/bips-hb/arfpy/blob/master/requirements.txt). 
+The project uses [uv](https://docs.astral.sh/uv/) for dependency management. With uv installed, `uv sync` sets up a virtual environment with all dependencies. We recommend `python>=3.9`. 
 
 ## Usage
 To illustrate the usage of the software, we can use the iris dataset and train an ARF, estimate distribution parameters and generate new data:
